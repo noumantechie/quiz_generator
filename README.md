@@ -8,7 +8,7 @@ Transform any document (PDF, DOCX, TXT) into interactive quizzes and flashcards.
 
 ## 💡 The Problem
 
-Students spend hours manually creating study materials. Traditional quiz generators produce generic questions that don't match the document's content.
+Students often finish studying notes or slides but lack quick ways to test their understanding. QuizFlash enables users to upload study documents and instantly generate quizzes or flashcards for self-assessment.
 
 ## ✨ Our Solution
 
