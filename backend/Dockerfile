@@ -1,10 +1,13 @@
+# syntax=docker/dockerfile:1.4
+
 FROM python:3.11-slim
 
 # Set working directory
 WORKDIR /app
 
 # Install system dependencies in one layer
-RUN apt-get update && apt-get install -y \
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update && apt-get install -y \
     gcc \
     g++ \
     && rm -rf /var/lib/apt/lists/*
@@ -12,11 +15,10 @@ RUN apt-get update && apt-get install -y \
 # Copy requirements first for better caching
 COPY requirements.txt .
 
-# Install Python dependencies with pip cache for faster rebuilds
-# Use --prefer-binary to avoid compiling from source when possible
+# Install Python dependencies with aggressive caching
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip && \
-    pip install --prefer-binary --no-cache-dir -r requirements.txt
+    pip install --upgrade pip setuptools wheel && \
+    pip install --prefer-binary -r requirements.txt
 
 # Copy application code
 COPY . .
@@ -30,6 +32,7 @@ EXPOSE 5000
 # Set environment variables
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 
 # Run the application
 CMD ["python", "app.py"]

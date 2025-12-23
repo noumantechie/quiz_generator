@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.4
+
 # Stage 1: Build React app
 FROM node:18-alpine AS build
 
@@ -6,8 +8,9 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install ALL dependencies - use npm install instead of npm ci to avoid lock file issues
-RUN npm install
+# Install ALL dependencies with npm cache
+RUN --mount=type=cache,target=/root/.npm \
+    npm install
 
 # Copy source code
 COPY . .
