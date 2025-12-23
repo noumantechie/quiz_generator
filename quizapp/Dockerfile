@@ -1,17 +1,13 @@
-# syntax=docker/dockerfile:1.4
-
-# Stage 1: Build React app
-FROM node:18-alpine AS build
+# Build stage
+FROM node:18-alpine as build
 
 WORKDIR /app
 
 # Copy package files
-# Cache bust: 2024-12-24-01:19 - Added lucide-react dependency
 COPY package*.json ./
 
-# Install ALL dependencies with npm cache
-RUN --mount=type=cache,target=/root/.npm \
-    npm install
+# Install dependencies
+RUN npm ci --only=production
 
 # Copy source code
 COPY . .
@@ -19,16 +15,16 @@ COPY . .
 # Build the app
 RUN npm run build
 
-# Stage 2: Serve with Nginx
+# Production stage with Nginx
 FROM nginx:alpine
 
-# Copy built files from build stage
+# Copy built app
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy custom nginx configuration
+# Copy nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80
+# Expose port
 EXPOSE 80
 
 # Start nginx

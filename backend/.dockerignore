@@ -1,20 +1,39 @@
-venv/
+# Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-.Python
+*.py[cod]
+*$py.class
 *.so
-*.egg
-*.egg-info/
-dist/
-build/
-.env
-.env.*
-uploads/*
-!uploads/.gitkeep
-.git/
-.gitignore
+.Python
+venv/
+env/
+ENV/
+
+# IDE
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Uploads (created at runtime)
+uploads/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# CI/CD
+.github/
+
+# Misc
 *.log
+*.md
+.env.example

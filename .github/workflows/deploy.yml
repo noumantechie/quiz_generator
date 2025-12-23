@@ -20,15 +20,13 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Prune Docker images
-        run: docker system prune -af
-
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # Build and push backend image
       - name: Build and push backend image
         uses: docker/build-push-action@v5
         with:
@@ -37,9 +35,9 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/quizflash-backend:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/quizflash-backend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/quizflash-backend:buildcache,mode=max
-          build-args: |
-            BUILDKIT_INLINE_CACHE=1
+          platforms: linux/amd64
 
+      # Build and push frontend image
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:
@@ -48,25 +46,19 @@ jobs:
           tags: ${{ secrets.DOCKER_USERNAME }}/quizflash-frontend:latest
           cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/quizflash-frontend:buildcache
           cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/quizflash-frontend:buildcache,mode=max
-          build-args: |
-            BUILDKIT_INLINE_CACHE=1
+          platforms: linux/amd64
 
-      - name: Setup and Deploy to DigitalOcean Droplet
+      # Deploy to DigitalOcean
+      - name: Deploy to DigitalOcean Droplet
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.DROPLET_IP }}
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_KEY }}
           script: |
-            # Check if Docker is installed, if not, run setup
+            # Install Docker if not present
             if ! command -v docker &> /dev/null; then
-              echo "🔧 Docker not found. Running initial setup..."
-              
-              # Update system
-              apt-get update
-              apt-get upgrade -y
-              
-              # Install Docker
+              echo "🔧 Installing Docker..."
               curl -fsSL https://get.docker.com -o get-docker.sh
               sh get-docker.sh
               rm get-docker.sh
@@ -81,10 +73,10 @@ jobs:
               ufw allow 443/tcp
               ufw --force enable
               
-              echo "✅ Docker and Docker Compose installed successfully!"
+              echo "✅ Docker installed!"
             fi
 
-            # Create application directory if it doesn't exist
+            # Create app directory
             mkdir -p /opt/quizflash
             cd /opt/quizflash
 
@@ -105,9 +97,14 @@ jobs:
                   - PORT=5000
                 volumes:
                   - backend_uploads:/app/uploads
-                restart: always
+                restart: unless-stopped
                 networks:
                   - quizflash-network
+                healthcheck:
+                  test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+                  interval: 30s
+                  timeout: 10s
+                  retries: 3
 
               frontend:
                 image: ${{ secrets.DOCKER_USERNAME }}/quizflash-frontend:latest
@@ -115,8 +112,9 @@ jobs:
                 ports:
                   - "80:80"
                 depends_on:
-                  - backend
-                restart: always
+                  backend:
+                    condition: service_healthy
+                restart: unless-stopped
                 networks:
                   - quizflash-network
 
@@ -132,25 +130,26 @@ jobs:
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
             # Pull latest images
-            echo "📥 Pulling latest Docker images..."
+            echo "📥 Pulling latest images..."
             docker pull ${{ secrets.DOCKER_USERNAME }}/quizflash-backend:latest
             docker pull ${{ secrets.DOCKER_USERNAME }}/quizflash-frontend:latest
 
-            # Stop and remove old containers (if they exist)
-            echo "🔄 Updating containers..."
+            # Stop old containers
+            echo "🔄 Stopping old containers..."
             docker-compose down 2>/dev/null || true
 
             # Start new containers
             echo "🚀 Starting services..."
             docker-compose up -d
 
-            # Clean up old images
-            docker image prune -f
+            # Clean up
+            docker image prune -af
+            docker volume prune -f
 
             # Show status
             echo ""
-            echo "✅ Deployment completed successfully!"
+            echo "✅ Deployment completed!"
             echo "📊 Container Status:"
             docker-compose ps
             echo ""
-            echo "🌐 Application is live at: http://${{ secrets.DROPLET_IP }}"
+            echo "🌐 Application: http://${{ secrets.DROPLET_IP }}"
