@@ -6,6 +6,7 @@ FROM node:18-alpine AS build
 WORKDIR /app
 
 # Copy package files
+# Cache bust: 2024-12-24-01:19 - Added lucide-react dependency
 COPY package*.json ./
 
 # Install ALL dependencies with npm cache
