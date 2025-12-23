@@ -143,7 +143,7 @@ def generate_quiz_with_groq(context_text, num_questions=5, mode="quiz", difficul
         system_message = f"""You are a quiz generator. Analyze the provided text and generate exactly {num_questions} multiple-choice questions.
 
 CRITICAL: Output ONLY valid JSON. No markdown, no code blocks, no explanations.
-LANGUAGE: Generate ALL content (questions, options, tags) in {language_name}.
+LANGUAGE: Generate ALL content (questions, options, tags, explanations) in {language_name}.
 DIFFICULTY: {difficulty_instruction}
 
 Required JSON structure:
@@ -154,7 +154,8 @@ Required JSON structure:
             "question": "Clear, specific question about the content?",
             "options": ["Option A", "Option B", "Option C", "Option D"],
             "correctIndex": 0,
-            "tag": "Topic Name"
+            "tag": "Topic Name",
+            "explanation": "Brief explanation of why the correct answer is right and why other options are incorrect"
         }}
     ]
 }}
@@ -165,8 +166,11 @@ Rules:
 3. correctIndex is 0-3 (the position of the correct answer)
 4. tag should be a topic category from the content
 5. Ensure only one option is clearly correct
-6. ALL text must be in {language_name}
-7. Adjust complexity based on difficulty level: {difficulty}"""
+6. explanation should provide learning value - explain the correct concept and clarify common misconceptions
+7. Keep explanations concise but informative (1-2 sentences)
+8. ALL text (including explanations) must be in {language_name}
+9. Adjust complexity based on difficulty level: {difficulty}"""
+
 
         user_message = f"""Based on this content, generate {num_questions} quiz questions in {language_name} at {difficulty} difficulty level:
 
