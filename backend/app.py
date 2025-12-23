@@ -1,0 +1,383 @@
+from flask import Flask, request, jsonify, session
+from flask_cors import CORS
+import os
+import json
+import numpy as np
+from dotenv import load_dotenv
+from groq import Groq
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+from PyPDF2 import PdfReader
+import docx
+import secrets
+
+# Load environment variables
+load_dotenv()
+
+# Initialize Flask app
+app = Flask(__name__)
+app.secret_key = secrets.token_hex(16)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
+
+# Enable CORS for React frontend
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["http://localhost:3000"],
+        "supports_credentials": True
+    }
+})
+
+# Configure Groq
+GROQ_API_KEY = os.getenv('GROQ_API_KEY', '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')
+groq_client = Groq(api_key=GROQ_API_KEY)
+
+# Groq model - using llama-3.3-70b-versatile (fast and good quality)
+GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')
+
+# Initialize embedding model (cached globally)
+print("Loading embedding model...")
+embedding_model = SentenceTransformer('all-MiniLM-L6-v2')
+print("Embedding model loaded!")
+
+# In-memory storage for session data (use Redis in production)
+document_store = {}
+
+
+# --- Helper Functions ---
+
+def extract_text(file_path, file_type):
+    """Extract text from uploaded document."""
+    text = ""
+    
+    try:
+        if file_type == 'application/pdf':
+            reader = PdfReader(file_path)
+            for page in reader.pages:
+                text += page.extract_text() or ""
+                
+        elif file_type == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+            doc = docx.Document(file_path)
+            text = "\n".join([para.text for para in doc.paragraphs])
+            
+        else:  # TXT
+            with open(file_path, 'r', encoding='utf-8') as f:
+                text = f.read()
+                
+    except Exception as e:
+        raise Exception(f"Error extracting text: {str(e)}")
+    
+    return text
+
+
+def chunk_text(text, chunk_size=500, overlap=50):
+    """Split text into overlapping chunks for better context."""
+    chunks = []
+    start = 0
+    text_length = len(text)
+    
+    while start < text_length:
+        end = start + chunk_size
+        chunk = text[start:end]
+        
+        # Only add non-empty chunks
+        if chunk.strip():
+            chunks.append(chunk)
+        
+        start += (chunk_size - overlap)
+    
+    return chunks if chunks else [text]  # Return full text if chunking fails
+
+
+def generate_embeddings(chunks):
+    """Generate embeddings for text chunks."""
+    try:
+        embeddings = embedding_model.encode(chunks)
+        return embeddings
+    except Exception as e:
+        raise Exception(f"Error generating embeddings: {str(e)}")
+
+
+def retrieve_relevant_chunks(chunks, embeddings, num_chunks=4):
+    """
+    Retrieve most relevant chunks using RAG.
+    Uses a general query to find dense/informative chunks.
+    """
+    # Query for key information
+    query = "important concepts, definitions, key facts, and main ideas"
+    query_embedding = embedding_model.encode([query])
+    
+    # Calculate similarities
+    similarities = cosine_similarity(query_embedding, embeddings)[0]
+    
+    # Get top chunks
+    top_indices = np.argsort(similarities)[::-1][:num_chunks]
+    
+    # Return selected chunks
+    retrieved_chunks = [chunks[i] for i in top_indices]
+    return "\n\n".join(retrieved_chunks)
+
+
+def generate_quiz_with_groq(context_text, num_questions=5, mode="quiz"):
+    """Generate quiz or flashcards using Groq API with RAG context."""
+    
+    if mode == "quiz":
+        system_message = f"""You are a quiz generator. Analyze the provided text and generate exactly {num_questions} multiple-choice questions.
+
+CRITICAL: Output ONLY valid JSON. No markdown, no code blocks, no explanations.
+
+Required JSON structure:
+{{
+    "quiz": [
+        {{
+            "id": 1,
+            "question": "Clear, specific question about the content?",
+            "options": ["Option A", "Option B", "Option C", "Option D"],
+            "correctIndex": 0,
+            "tag": "Topic Name"
+        }}
+    ]
+}}
+
+Rules:
+1. Questions must be factual and answerable from the text
+2. Each question must have exactly 4 options
+3. correctIndex is 0-3 (the position of the correct answer)
+4. tag should be a topic category from the content
+5. Make questions challenging but fair
+6. Ensure only one option is clearly correct"""
+
+        user_message = f"""Based on this content, generate {num_questions} quiz questions:
+
+{context_text}
+
+Generate the JSON now:"""
+    
+    else:  # flashcard mode
+        system_message = f"""You are a flashcard generator. Analyze the provided text and generate exactly {num_questions} flashcards.
+
+CRITICAL: Output ONLY valid JSON. No markdown, no code blocks, no explanations.
+
+Required JSON structure:
+{{
+    "flashcards": [
+        {{
+            "id": 1,
+            "front": "Term or concept",
+            "back": "Clear, concise definition or explanation",
+            "tag": "Topic Name"
+        }}
+    ]
+}}
+
+Rules:
+1. Front should be a key term, concept, or question
+2. Back should be the definition, explanation, or answer
+3. Keep explanations clear and concise
+4. tag should be a topic category from the content
+5. Focus on the most important concepts"""
+
+        user_message = f"""Based on this content, generate {num_questions} flashcards:
+
+{context_text}
+
+Generate the JSON now:"""
+    
+    try:
+        # Call Groq API
+        chat_completion = groq_client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_message}
+            ],
+            model=GROQ_MODEL,
+            temperature=0.7,
+            max_tokens=2048
+        )
+        
+        # Get response text
+        response_text = chat_completion.choices[0].message.content.strip()
+        
+        # Remove markdown code blocks if present
+        if response_text.startswith('```'):
+            # Remove opening ```json or ```
+            response_text = response_text.split('\n', 1)[1] if '\n' in response_text else response_text[3:]
+            # Remove closing ```
+            if response_text.endswith('```'):
+                response_text = response_text[:-3]
+        
+        response_text = response_text.strip()
+        
+        # Parse JSON
+        result = json.loads(response_text)
+        
+        return result
+        
+    except json.JSONDecodeError as e:
+        print(f"JSON Parse Error: {e}")
+        print(f"Response text: {response_text}")
+        raise Exception(f"Failed to parse Groq response as JSON: {str(e)}")
+    except Exception as e:
+        print(f"Groq API Error: {e}")
+        raise Exception(f"Error calling Groq API: {str(e)}")
+
+
+# --- API Routes ---
+
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint."""
+    return jsonify({
+        "status": "healthy",
+        "message": "QuizFlash Backend is running!",
+        "embedding_model": "all-MiniLM-L6-v2",
+        "llm_model": GROQ_MODEL,
+        "llm_provider": "Groq"
+    }), 200
+
+
+@app.route('/api/upload', methods=['POST'])
+def upload_document():
+    """
+    Upload and process document.
+    Returns a session ID for subsequent generation requests.
+    """
+    try:
+        # Check if file is present
+        if 'file' not in request.files:
+            return jsonify({"error": "No file provided"}), 400
+        
+        file = request.files['file']
+        
+        if file.filename == '':
+            return jsonify({"error": "Empty filename"}), 400
+        
+        # Get file extension and validate
+        file_type = file.content_type
+        allowed_types = [
+            'application/pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'text/plain'
+        ]
+        
+        if file_type not in allowed_types:
+            return jsonify({"error": "Unsupported file type. Please upload PDF, DOCX, or TXT"}), 400
+        
+        # Save file temporarily
+        upload_folder = 'uploads'
+        os.makedirs(upload_folder, exist_ok=True)
+        
+        file_path = os.path.join(upload_folder, file.filename)
+        file.save(file_path)
+        
+        # Extract text
+        print(f"Extracting text from {file.filename}...")
+        text = extract_text(file_path, file_type)
+        
+        if not text or len(text.strip()) < 50:
+            os.remove(file_path)
+            return jsonify({"error": "Document appears to be empty or too short"}), 400
+        
+        print(f"Extracted {len(text)} characters")
+        
+        # Chunk text
+        print("Chunking text...")
+        chunks = chunk_text(text, chunk_size=500, overlap=50)
+        print(f"Created {len(chunks)} chunks")
+        
+        # Generate embeddings
+        print("Generating embeddings...")
+        embeddings = generate_embeddings(chunks)
+        print(f"Generated embeddings with shape {embeddings.shape}")
+        
+        # Generate session ID
+        session_id = secrets.token_hex(16)
+        
+        # Store in memory (use Redis/DB in production)
+        document_store[session_id] = {
+            "filename": file.filename,
+            "chunks": chunks,
+            "embeddings": embeddings,
+            "text_length": len(text)
+        }
+        
+        # Clean up file
+        os.remove(file_path)
+        
+        return jsonify({
+            "success": True,
+            "session_id": session_id,
+            "filename": file.filename,
+            "chunks_count": len(chunks),
+            "text_length": len(text)
+        }), 200
+        
+    except Exception as e:
+        print(f"Upload error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/generate', methods=['POST'])
+def generate_content():
+    """
+    Generate quiz or flashcards using RAG.
+    Requires session_id from upload response.
+    """
+    try:
+        data = request.get_json()
+        
+        # Validate request
+        if not data:
+            return jsonify({"error": "No JSON data provided"}), 400
+        
+        session_id = data.get('session_id')
+        mode = data.get('mode', 'quiz')  # 'quiz' or 'flashcard'
+        num_questions = data.get('num_questions', 5)
+        
+        if not session_id:
+            return jsonify({"error": "session_id is required"}), 400
+        
+        if session_id not in document_store:
+            return jsonify({"error": "Invalid session_id or session expired"}), 404
+        
+        # Retrieve document data
+        doc_data = document_store[session_id]
+        chunks = doc_data['chunks']
+        embeddings = doc_data['embeddings']
+        
+        # RAG: Retrieve relevant chunks
+        print(f"Retrieving relevant chunks for {mode} generation...")
+        context_text = retrieve_relevant_chunks(chunks, embeddings, num_chunks=min(4, len(chunks)))
+        
+        print(f"Context length: {len(context_text)} characters")
+        
+        # Generate using Groq
+        print(f"Generating {mode} with Groq...")
+        result = generate_quiz_with_groq(context_text, num_questions, mode)
+        
+        print(f"Successfully generated {mode}")
+        
+        return jsonify({
+            "success": True,
+            "data": result,
+            "mode": mode
+        }), 200
+        
+    except Exception as e:
+        print(f"Generation error: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+# --- Run Server ---
+if __name__ == '__main__':
+    port = int(os.getenv('PORT', 5000))
+    print(f"\n🚀 QuizFlash Backend starting on port {port}...")
+    print(f"📡 CORS enabled for http://localhost:3000")
+    print(f"🤖 Using Groq model: {GROQ_MODEL}")
+    print(f"🧠 Embedding model: all-MiniLM-L6-v2")
+    print(f"⚡ Groq API: Ultra-fast inference\n")
+    
+    app.run(
+        host='0.0.0.0',
+        port=port,
+        debug=os.getenv('FLASK_ENV') == 'development'
+    )
