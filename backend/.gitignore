@@ -35,10 +35,9 @@ wheels/
 *~
 
 # Uploads
-uploads/
-*.pdf
-*.docx
-*.txt
+uploads/*.pdf
+uploads/*.docx
+uploads/*.txt
 
 # OS
 .DS_Store
