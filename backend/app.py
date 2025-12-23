@@ -117,13 +117,34 @@ def retrieve_relevant_chunks(chunks, embeddings, num_chunks=4):
     return "\n\n".join(retrieved_chunks)
 
 
-def generate_quiz_with_groq(context_text, num_questions=5, mode="quiz"):
+def generate_quiz_with_groq(context_text, num_questions=5, mode="quiz", difficulty="medium", language="en"):
     """Generate quiz or flashcards using Groq API with RAG context."""
+    
+    # Language configurations
+    language_names = {
+        "en": "English",
+        "ur": "Urdu",
+        "es": "Spanish",
+        "fr": "French",
+        "ar": "Arabic"
+    }
+    
+    # Difficulty configurations
+    difficulty_instructions = {
+        "basic": "Focus on simple recall questions, straightforward language, and fundamental concepts. Questions should test basic understanding and memorization.",
+        "medium": "Include moderate complexity questions with some application-based scenarios. Balance between recall and understanding.",
+        "advanced": "Create challenging questions requiring critical thinking, analysis, and multi-step reasoning. Include complex scenarios and deep conceptual understanding."
+    }
+    
+    language_name = language_names.get(language, "English")
+    difficulty_instruction = difficulty_instructions.get(difficulty, difficulty_instructions["medium"])
     
     if mode == "quiz":
         system_message = f"""You are a quiz generator. Analyze the provided text and generate exactly {num_questions} multiple-choice questions.
 
 CRITICAL: Output ONLY valid JSON. No markdown, no code blocks, no explanations.
+LANGUAGE: Generate ALL content (questions, options, tags) in {language_name}.
+DIFFICULTY: {difficulty_instruction}
 
 Required JSON structure:
 {{
@@ -143,10 +164,11 @@ Rules:
 2. Each question must have exactly 4 options
 3. correctIndex is 0-3 (the position of the correct answer)
 4. tag should be a topic category from the content
-5. Make questions challenging but fair
-6. Ensure only one option is clearly correct"""
+5. Ensure only one option is clearly correct
+6. ALL text must be in {language_name}
+7. Adjust complexity based on difficulty level: {difficulty}"""
 
-        user_message = f"""Based on this content, generate {num_questions} quiz questions:
+        user_message = f"""Based on this content, generate {num_questions} quiz questions in {language_name} at {difficulty} difficulty level:
 
 {context_text}
 
@@ -156,6 +178,8 @@ Generate the JSON now:"""
         system_message = f"""You are a flashcard generator. Analyze the provided text and generate exactly {num_questions} flashcards.
 
 CRITICAL: Output ONLY valid JSON. No markdown, no code blocks, no explanations.
+LANGUAGE: Generate ALL content (front, back, tags) in {language_name}.
+DIFFICULTY: {difficulty_instruction}
 
 Required JSON structure:
 {{
@@ -172,11 +196,13 @@ Required JSON structure:
 Rules:
 1. Front should be a key term, concept, or question
 2. Back should be the definition, explanation, or answer
-3. Keep explanations clear and concise
+3. Keep explanations clear and concise based on difficulty
 4. tag should be a topic category from the content
-5. Focus on the most important concepts"""
+5. Focus on the most important concepts
+6. ALL text must be in {language_name}
+7. Adjust complexity based on difficulty level: {difficulty}"""
 
-        user_message = f"""Based on this content, generate {num_questions} flashcards:
+        user_message = f"""Based on this content, generate {num_questions} flashcards in {language_name} at {difficulty} difficulty level:
 
 {context_text}
 
@@ -321,6 +347,7 @@ def generate_content():
     """
     Generate quiz or flashcards using RAG.
     Requires session_id from upload response.
+    Supports difficulty levels and multiple languages.
     """
     try:
         data = request.get_json()
@@ -332,12 +359,29 @@ def generate_content():
         session_id = data.get('session_id')
         mode = data.get('mode', 'quiz')  # 'quiz' or 'flashcard'
         num_questions = data.get('num_questions', 5)
+        difficulty = data.get('difficulty', 'medium')  # 'basic', 'medium', 'advanced'
+        language = data.get('language', 'en')  # 'en', 'ur', 'es', 'fr', 'ar'
         
+        # Validate parameters
         if not session_id:
             return jsonify({"error": "session_id is required"}), 400
         
         if session_id not in document_store:
             return jsonify({"error": "Invalid session_id or session expired"}), 404
+        
+        # Validate difficulty
+        valid_difficulties = ['basic', 'medium', 'advanced']
+        if difficulty not in valid_difficulties:
+            return jsonify({"error": f"Invalid difficulty. Must be one of: {', '.join(valid_difficulties)}"}), 400
+        
+        # Validate language
+        valid_languages = ['en', 'ur', 'es', 'fr', 'ar']
+        if language not in valid_languages:
+            return jsonify({"error": f"Invalid language. Must be one of: {', '.join(valid_languages)}"}), 400
+        
+        # Validate num_questions
+        if not isinstance(num_questions, int) or num_questions < 3 or num_questions > 20:
+            return jsonify({"error": "num_questions must be between 3 and 20"}), 400
         
         # Retrieve document data
         doc_data = document_store[session_id]
@@ -349,17 +393,20 @@ def generate_content():
         context_text = retrieve_relevant_chunks(chunks, embeddings, num_chunks=min(4, len(chunks)))
         
         print(f"Context length: {len(context_text)} characters")
+        print(f"Difficulty: {difficulty}, Language: {language}, Questions: {num_questions}")
         
         # Generate using Groq
         print(f"Generating {mode} with Groq...")
-        result = generate_quiz_with_groq(context_text, num_questions, mode)
+        result = generate_quiz_with_groq(context_text, num_questions, mode, difficulty, language)
         
         print(f"Successfully generated {mode}")
         
         return jsonify({
             "success": True,
             "data": result,
-            "mode": mode
+            "mode": mode,
+            "difficulty": difficulty,
+            "language": language
         }), 200
         
     except Exception as e:
