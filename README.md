@@ -206,13 +206,54 @@ This project includes a complete **CI/CD pipeline** for automated deployment.
 - Backend: `noman071/quizflash-backend:latest`
 - Frontend: `noman071/quizflash-frontend:latest`
 
-### Manual Deployment
+### Manual Docker Deployment
 
-See **[DEPLOYMENT.md](DEPLOYMENT.md)** for detailed instructions on:
-- Setting up a DigitalOcean droplet
-- Configuring Docker and Docker Compose
-- Setting up custom domains and SSL
-- Monitoring and troubleshooting
+If you prefer manual deployment:
+
+```bash
+# On your server (DigitalOcean droplet, AWS EC2, etc.)
+# 1. Install Docker and Docker Compose
+curl -fsSL https://get.docker.com -o get-docker.sh
+sh get-docker.sh
+
+# 2. Create docker-compose.yml
+cat > docker-compose.yml << 'EOF'
+version: '3.8'
+
+services:
+  backend:
+    image: noman071/quizflash-backend:latest
+    container_name: quizflash-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - GROQ_API_KEY=your_groq_api_key_here
+      - GROQ_MODEL=llama-3.3-70b-versatile
+      - FLASK_ENV=production
+      - PORT=5000
+    restart: unless-stopped
+
+  frontend:
+    image: noman071/quizflash-frontend:latest
+    container_name: quizflash-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+EOF
+
+# 3. Start containers
+docker-compose up -d
+
+# 4. Check logs
+docker logs quizflash-backend
+docker logs quizflash-frontend
+```
+
+**Access your app:**
+- Frontend: `http://your-server-ip`
+- Backend API: `http://your-server-ip:5000`
 
 ---
 
