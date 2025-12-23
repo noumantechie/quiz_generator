@@ -33,8 +33,7 @@ jobs:
           context: ./backend
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/quizflash-backend:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/quizflash-backend:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_USERNAME }}/quizflash-backend:buildcache,mode=max
+          no-cache: true
           platforms: linux/amd64
 
       # Build and push frontend image
