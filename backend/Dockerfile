@@ -1,22 +1,15 @@
-FROM python:3.11-slim
-
-# Set working directory
+FROM python:3.11-slim AS builder
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    gcc \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements first for better caching
+# Install Python dependencies (no cache)
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip uninstall -y nvidia-* torch torchvision torchaudio || true
 
-# Install Python dependencies
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
-
-# Copy application code
+# Runtime image
+FROM python:3.11-slim
+WORKDIR /app
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY . .
 
 # Create uploads directory
@@ -25,7 +18,7 @@ RUN mkdir -p uploads
 # Expose port
 EXPOSE 5000
 
-# Set environment variables
+# Environment variables
 ENV FLASK_ENV=production
 ENV PYTHONUNBUFFERED=1
 
