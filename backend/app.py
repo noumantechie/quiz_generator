@@ -31,8 +31,8 @@ CORS(app, resources={
 GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyDicurrYVbHzQvlxUAEuTLXcfWnJLzUCEw')
 genai.configure(api_key=GEMINI_API_KEY)
 
-# Gemini model - using gemini-1.5-flash (fast and reliable)
-GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-1.5-flash')
+# Gemini model - using gemini-pro (stable and widely supported)
+GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-pro')
 gemini_model = genai.GenerativeModel(GEMINI_MODEL)
 
 # Initialize embedding model (cached globally)
