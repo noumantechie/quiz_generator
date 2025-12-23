@@ -4,7 +4,7 @@ import os
 import json
 import numpy as np
 from dotenv import load_dotenv
-import google.generativeai as genai
+from groq import Groq
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 from PyPDF2 import PdfReader
@@ -27,13 +27,13 @@ CORS(app, resources={
     }
 })
 
-# Configure Google Gemini
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', 'AIzaSyDicurrYVbHzQvlxUAEuTLXcfWnJLzUCEw')
-genai.configure(api_key=GEMINI_API_KEY)
+# Configure Groq
+GROQ_API_KEY = os.getenv('GROQ_API_KEY')
+if not GROQ_API_KEY:
+    raise ValueError("GROQ_API_KEY environment variable is required")
 
-# Gemini model - using gemini-pro (stable and widely supported)
-GEMINI_MODEL = os.getenv('GEMINI_MODEL', 'gemini-pro')
-gemini_model = genai.GenerativeModel(GEMINI_MODEL)
+groq_client = Groq(api_key=GROQ_API_KEY)
+GROQ_MODEL = os.getenv('GROQ_MODEL', 'llama-3.3-70b-versatile')
 
 # Initialize embedding model (cached globally)
 print("Loading embedding model...")
@@ -119,8 +119,9 @@ def retrieve_relevant_chunks(chunks, embeddings, num_chunks=4):
 
 
 
-def generate_quiz_with_gemini(context_text, num_questions=5, mode="quiz", difficulty="medium", language="en"):
-    """Generate quiz or flashcards using Gemini API with RAG context."""
+
+def generate_quiz_with_groq(context_text, num_questions=5, mode="quiz", difficulty="medium", language="en"):
+    """Generate quiz or flashcards using Groq API with RAG context."""
     
     # Language configurations
     language_names = {
@@ -214,9 +215,20 @@ Based on this content, generate {num_questions} flashcards in {language_name} at
 Generate the JSON now:"""
     
     try:
-        # Call Gemini API
-        response = gemini_model.generate_content(prompt)
-        response_text = response.text.strip()
+        # Call Groq API
+        chat_completion = groq_client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            model=GROQ_MODEL,
+            temperature=0.7,
+            max_tokens=4096,
+        )
+        
+        response_text = chat_completion.choices[0].message.content.strip()
         
         # Remove markdown code blocks if present
         if response_text.startswith('```'):
@@ -236,10 +248,12 @@ Generate the JSON now:"""
     except json.JSONDecodeError as e:
         print(f"JSON Parse Error: {e}")
         print(f"Response text: {response_text}")
-        raise Exception(f"Failed to parse Gemini response as JSON: {str(e)}")
+        raise Exception(f"Failed to parse Groq response as JSON: {str(e)}")
     except Exception as e:
-        print(f"Gemini API Error: {e}")
-        raise Exception(f"Error calling Gemini API: {str(e)}")
+        print(f"Groq API Error: {e}")
+        raise Exception(f"Error calling Groq API: {str(e)}")
+
+
 
 
 
@@ -252,8 +266,8 @@ def health_check():
         "status": "healthy",
         "message": "QuizFlash Backend is running!",
         "embedding_model": "all-MiniLM-L6-v2",
-        "llm_model": GEMINI_MODEL,
-        "llm_provider": "Google Gemini"
+        "llm_model": GROQ_MODEL,
+        "llm_provider": "Groq"
     }), 200
 
 
@@ -391,9 +405,9 @@ def generate_content():
         print(f"Context length: {len(context_text)} characters")
         print(f"Difficulty: {difficulty}, Language: {language}, Questions: {num_questions}")
         
-        # Generate using Gemini
-        print(f"Generating {mode} with Gemini...")
-        result = generate_quiz_with_gemini(context_text, num_questions, mode, difficulty, language)
+        # Generate using Groq
+        print(f"Generating {mode} with Groq...")
+        result = generate_quiz_with_groq(context_text, num_questions, mode, difficulty, language)
         
         print(f"Successfully generated {mode}")
         
@@ -415,9 +429,9 @@ if __name__ == '__main__':
     port = int(os.getenv('PORT', 5000))
     print(f"\n🚀 QuizFlash Backend starting on port {port}...")
     print(f"📡 CORS enabled for http://localhost:3000")
-    print(f"🤖 Using Gemini model: {GEMINI_MODEL}")
+    print(f"🤖 Using Groq model: {GROQ_MODEL}")
     print(f"🧠 Embedding model: all-MiniLM-L6-v2")
-    print(f"⚡ Google Gemini API: Fast and reliable\n")
+    print(f"⚡ Groq API: Fast and reliable\n")
     
     app.run(
         host='0.0.0.0',

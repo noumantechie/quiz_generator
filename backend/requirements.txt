@@ -5,7 +5,8 @@ python-dotenv==1.0.0
 Werkzeug>=3.0.0
 
 # Google Generative AI (Gemini) - Reliable and no dependency issues
-google-generativeai>=0.3.0
+groq==0.9.0
+httpx==0.25.2
 
 # Lightweight sentence transformers (CPU-only)
 sentence-transformers==2.3.1
