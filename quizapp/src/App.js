@@ -17,7 +17,8 @@ import {
 } from 'lucide-react';
 
 /* --- 1. API CONFIGURATION --- */
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+// Use the same host as frontend, but port 5000 for backend
+const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || `http://${window.location.hostname}:5000`;
 
 /* --- 2. API FUNCTIONS --- */
 const uploadDocument = async (file) => {
