@@ -1,0 +1,138 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/quizflash-backend:latest
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./quizapp
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/quizflash-frontend:latest
+
+      - name: Setup and Deploy to DigitalOcean Droplet
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DROPLET_IP }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            # Check if Docker is installed, if not, run setup
+            if ! command -v docker &> /dev/null; then
+              echo "🔧 Docker not found. Running initial setup..."
+              
+              # Update system
+              apt-get update
+              apt-get upgrade -y
+              
+              # Install Docker
+              curl -fsSL https://get.docker.com -o get-docker.sh
+              sh get-docker.sh
+              rm get-docker.sh
+              
+              # Install Docker Compose
+              curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              chmod +x /usr/local/bin/docker-compose
+              
+              # Configure firewall
+              ufw allow 22/tcp
+              ufw allow 80/tcp
+              ufw allow 443/tcp
+              ufw --force enable
+              
+              echo "✅ Docker and Docker Compose installed successfully!"
+            fi
+
+            # Create application directory if it doesn't exist
+            mkdir -p /opt/quizflash
+            cd /opt/quizflash
+
+            # Create docker-compose.yml
+            cat > docker-compose.yml << 'EOF'
+            version: '3.8'
+
+            services:
+              backend:
+                image: ${{ secrets.DOCKER_USERNAME }}/quizflash-backend:latest
+                container_name: quizflash-backend
+                ports:
+                  - "5000:5000"
+                environment:
+                  - GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
+                  - GROQ_MODEL=llama-3.3-70b-versatile
+                  - FLASK_ENV=production
+                  - PORT=5000
+                volumes:
+                  - backend_uploads:/app/uploads
+                restart: always
+                networks:
+                  - quizflash-network
+
+              frontend:
+                image: ${{ secrets.DOCKER_USERNAME }}/quizflash-frontend:latest
+                container_name: quizflash-frontend
+                ports:
+                  - "80:80"
+                depends_on:
+                  - backend
+                restart: always
+                networks:
+                  - quizflash-network
+
+            volumes:
+              backend_uploads:
+
+            networks:
+              quizflash-network:
+                driver: bridge
+            EOF
+
+            # Login to Docker Hub
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+            # Pull latest images
+            echo "📥 Pulling latest Docker images..."
+            docker pull ${{ secrets.DOCKER_USERNAME }}/quizflash-backend:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/quizflash-frontend:latest
+
+            # Stop and remove old containers (if they exist)
+            echo "🔄 Updating containers..."
+            docker-compose down 2>/dev/null || true
+
+            # Start new containers
+            echo "🚀 Starting services..."
+            docker-compose up -d
+
+            # Clean up old images
+            docker image prune -f
+
+            # Show status
+            echo ""
+            echo "✅ Deployment completed successfully!"
+            echo "📊 Container Status:"
+            docker-compose ps
+            echo ""
+            echo "🌐 Application is live at: http://${{ secrets.DROPLET_IP }}"

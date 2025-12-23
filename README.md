@@ -113,6 +113,28 @@ POST /api/generate
 
 ---
 
+## 🚢 Deployment
+
+This project includes a complete CI/CD pipeline for automated deployment to DigitalOcean.
+
+**Quick Deploy:**
+1. Set up GitHub Secrets (Docker Hub, DigitalOcean)
+2. Push to `main` branch
+3. GitHub Actions automatically builds and deploys
+
+📖 **[Full Deployment Guide](DEPLOYMENT.md)** - Step-by-step instructions for:
+- Docker containerization
+- GitHub Actions CI/CD
+- DigitalOcean setup
+- Custom domain & SSL
+- Monitoring & troubleshooting
+
+**Docker Images:**
+- Backend: `noumantechie/quizflash-backend`
+- Frontend: `noumantechie/quizflash-frontend`
+
+---
+
 ## 📝 License
 
 MIT License
