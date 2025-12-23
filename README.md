@@ -316,7 +316,7 @@ REACT_APP_BACKEND_URL=http://localhost:5000  # Backend URL
 ### Docker deployment issues
 - Check GitHub Secrets are correctly set
 - Verify SSH key has correct permissions
-- Check droplet firewall allows ports 80, 443, 5000
+- Check droplet firewall allows ports 80, 443, 5000.
 
 ---
 
