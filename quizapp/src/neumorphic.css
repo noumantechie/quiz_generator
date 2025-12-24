@@ -1,77 +1,111 @@
 /* ============================================
-   NEUMORPHIC DESIGN OVERLAY
-   QuizFlash Generator - Visual Styling Only
+   VIBRANT DESIGN SYSTEM
+   QuizFlash Generator - Modern Colorful UI
    ============================================ */
 
-/* --- CSS Variables for Neumorphic Design --- */
+/* --- CSS Variables for Vibrant Design --- */
 :root {
-    /* Neumorphic Colors */
-    --neu-bg: #e6e9f0;
-    --neu-shadow-light: #ffffff;
-    --neu-shadow-dark: #c8cdd6;
+    /* Background Colors - Bright & Clean */
+    --vibrant-bg: #f8f9ff;
+    --vibrant-card-bg: #ffffff;
 
-    /* Shadows */
-    --neu-raised: 8px 8px 16px var(--neu-shadow-dark),
-        -8px -8px 16px var(--neu-shadow-light);
-    --neu-inset: inset 6px 6px 12px var(--neu-shadow-dark),
-        inset -6px -6px 12px var(--neu-shadow-light);
-    --neu-subtle: 4px 4px 8px var(--neu-shadow-dark),
-        -4px -4px 8px var(--neu-shadow-light);
+    /* Primary Colors - Vibrant & Bold */
+    --vibrant-blue: #3b82f6;
+    --vibrant-blue-light: #60a5fa;
+    --vibrant-blue-dark: #2563eb;
+    --vibrant-blue-gradient: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
 
-    /* Text Colors */
-    --neu-text: #5a6477;
-    --neu-text-secondary: #8891a3;
-    --neu-text-light: #a8b0bf;
+    --vibrant-purple: #8b5cf6;
+    --vibrant-purple-light: #a78bfa;
+    --vibrant-purple-dark: #7c3aed;
+    --vibrant-purple-gradient: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
 
-    /* Accents */
-    --neu-blue: #7c9bd4;
-    --neu-purple: #a89dd4;
-    --neu-green: #9dd4b8;
-    --neu-pink: #d49dbd;
-    --neu-amber: #d4c19d;
+    --vibrant-green: #10b981;
+    --vibrant-green-light: #34d399;
+    --vibrant-green-dark: #059669;
+    --vibrant-green-gradient: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+
+    --vibrant-pink: #ec4899;
+    --vibrant-pink-light: #f472b6;
+    --vibrant-pink-dark: #db2777;
+    --vibrant-pink-gradient: linear-gradient(135deg, #ec4899 0%, #f59e0b 100%);
+
+    --vibrant-amber: #f59e0b;
+    --vibrant-amber-light: #fbbf24;
+    --vibrant-amber-dark: #d97706;
+    --vibrant-amber-gradient: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+
+    --vibrant-red: #ef4444;
+    --vibrant-red-light: #f87171;
+    --vibrant-red-dark: #dc2626;
+    --vibrant-red-gradient: linear-gradient(135deg, #ef4444 0%, #ec4899 100%);
+
+    --vibrant-indigo: #6366f1;
+    --vibrant-indigo-light: #818cf8;
+    --vibrant-indigo-dark: #4f46e5;
+    --vibrant-indigo-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+
+    --vibrant-cyan: #06b6d4;
+    --vibrant-cyan-light: #22d3ee;
+    --vibrant-cyan-dark: #0891b2;
+
+    /* Text Colors - High Contrast */
+    --vibrant-text: #1e293b;
+    --vibrant-text-secondary: #475569;
+    --vibrant-text-light: #64748b;
+
+    /* Shadows - Colorful & Vibrant */
+    --vibrant-shadow: 0 10px 30px rgba(59, 130, 246, 0.15);
+    --vibrant-shadow-lg: 0 20px 50px rgba(59, 130, 246, 0.2);
+    --vibrant-shadow-purple: 0 10px 30px rgba(139, 92, 246, 0.15);
+    --vibrant-shadow-green: 0 10px 30px rgba(16, 185, 129, 0.15);
+    --vibrant-shadow-pink: 0 10px 30px rgba(236, 72, 153, 0.15);
+    --vibrant-shadow-amber: 0 10px 30px rgba(245, 158, 11, 0.15);
 }
+
 
 /* --- Global Background --- */
 body {
-    background: var(--neu-bg) !important;
+    background: var(--vibrant-bg) !important;
 }
 
-/* --- Override Tailwind Text Colors with Neumorphic --- */
+/* --- Override Tailwind Text Colors with Vibrant --- */
 .text-slate-800 {
-    color: var(--neu-text) !important;
+    color: var(--vibrant-text) !important;
 }
 
 .text-slate-700 {
-    color: var(--neu-text) !important;
+    color: var(--vibrant-text) !important;
 }
 
 .text-slate-600 {
-    color: var(--neu-text-secondary) !important;
+    color: var(--vibrant-text-secondary) !important;
 }
 
 .text-slate-500 {
-    color: var(--neu-text-secondary) !important;
+    color: var(--vibrant-text-light) !important;
 }
 
 .text-slate-400 {
-    color: var(--neu-text-light) !important;
+    color: var(--vibrant-text-light) !important;
 }
 
-/* --- Neumorphic Buttons --- */
+/* --- Vibrant Buttons --- */
 button {
-    background: var(--neu-bg) !important;
-    border: none !important;
-    box-shadow: var(--neu-raised) !important;
+    background: var(--vibrant-card-bg) !important;
+    border: 2px solid transparent !important;
+    box-shadow: var(--vibrant-shadow) !important;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    font-weight: 600 !important;
 }
 
 button:hover:not(:disabled) {
-    box-shadow: 10px 10px 20px var(--neu-shadow-dark),
-        -10px -10px 20px var(--neu-shadow-light) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: var(--vibrant-shadow-lg) !important;
 }
 
 button:active:not(:disabled) {
-    box-shadow: var(--neu-inset) !important;
+    transform: translateY(0) !important;
 }
 
 button:disabled {
@@ -82,139 +116,171 @@ button:disabled {
 /* --- Blue Buttons (Primary Actions) --- */
 .bg-blue-600,
 .bg-blue-700 {
-    background: var(--neu-bg) !important;
-    color: var(--neu-blue) !important;
+    background: var(--vibrant-blue-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: var(--vibrant-shadow) !important;
 }
 
 .bg-blue-600:hover,
 .bg-blue-700:hover {
-    background: var(--neu-bg) !important;
-    color: var(--neu-blue) !important;
+    background: var(--vibrant-blue-gradient) !important;
+    box-shadow: var(--vibrant-shadow-lg) !important;
 }
 
 /* --- Green Buttons (Success) --- */
 .bg-green-500,
 .bg-green-600 {
-    background: var(--neu-bg) !important;
-    color: var(--neu-green) !important;
+    background: var(--vibrant-green-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: var(--vibrant-shadow-green) !important;
+}
+
+.bg-green-500:hover,
+.bg-green-600:hover {
+    box-shadow: 0 20px 50px rgba(16, 185, 129, 0.3) !important;
 }
 
 /* --- Red Buttons (Error) --- */
 .bg-red-500,
 .bg-red-600 {
-    background: var(--neu-bg) !important;
-    color: var(--neu-pink) !important;
+    background: var(--vibrant-red-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: var(--vibrant-shadow-pink) !important;
 }
 
 /* --- Slate Buttons (Secondary) --- */
 .bg-slate-800,
 .bg-slate-900 {
-    background: var(--neu-bg) !important;
-    color: var(--neu-text) !important;
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+    color: white !important;
+    border: none !important;
 }
 
 /* --- White Backgrounds (Cards) --- */
 .bg-white {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-raised) !important;
-    border: none !important;
+    background: var(--vibrant-card-bg) !important;
+    box-shadow: var(--vibrant-shadow) !important;
+    border: 1px solid rgba(59, 130, 246, 0.1) !important;
 }
 
 /* --- Slate Backgrounds --- */
 .bg-slate-50,
 .bg-slate-100 {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+    border: 1px solid rgba(148, 163, 184, 0.2) !important;
 }
 
-/* --- Colored Backgrounds (Soft Pastels) --- */
+/* --- Colored Backgrounds (Vibrant Pastels) --- */
 .bg-blue-50 {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+    border: 1px solid rgba(59, 130, 246, 0.2) !important;
 }
 
 .bg-green-50 {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+    border: 1px solid rgba(16, 185, 129, 0.2) !important;
 }
 
 .bg-red-50 {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%) !important;
+    border: 1px solid rgba(239, 68, 68, 0.2) !important;
 }
 
 .bg-amber-50 {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%) !important;
+    border: 1px solid rgba(245, 158, 11, 0.2) !important;
 }
 
 .bg-purple-50 {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%) !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
 }
 
 .bg-indigo-50 {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%) !important;
+    border: 1px solid rgba(99, 102, 241, 0.2) !important;
 }
 
-/* --- Border Colors (Remove Borders) --- */
+/* --- Border Colors (Vibrant Borders) --- */
 .border-slate-200,
-.border-slate-300,
+.border-slate-300 {
+    border-color: rgba(148, 163, 184, 0.3) !important;
+}
+
 .border-blue-200,
+.border-blue-500 {
+    border-color: var(--vibrant-blue) !important;
+}
+
 .border-green-200,
+.border-green-500 {
+    border-color: var(--vibrant-green) !important;
+}
+
 .border-red-200,
+.border-red-500 {
+    border-color: var(--vibrant-red) !important;
+}
+
 .border-amber-200,
-.border-indigo-200,
-.border-purple-200,
-.border-blue-500,
-.border-green-500,
-.border-red-500,
-.border-indigo-500,
 .border-amber-500 {
-    border-color: transparent !important;
+    border-color: var(--vibrant-amber) !important;
+}
+
+.border-indigo-200,
+.border-indigo-500 {
+    border-color: var(--vibrant-indigo) !important;
+}
+
+.border-purple-200 {
+    border-color: var(--vibrant-purple) !important;
 }
 
 /* --- Text Colors for Accents --- */
 .text-blue-600,
 .text-blue-700 {
-    color: var(--neu-blue) !important;
+    color: var(--vibrant-blue) !important;
 }
 
 .text-green-600,
 .text-green-700,
 .text-green-800 {
-    color: var(--neu-green) !important;
+    color: var(--vibrant-green) !important;
 }
 
 .text-red-600,
 .text-red-700,
 .text-red-500 {
-    color: var(--neu-pink) !important;
+    color: var(--vibrant-red) !important;
 }
 
 .text-amber-700,
 .text-amber-500 {
-    color: var(--neu-amber) !important;
+    color: var(--vibrant-amber) !important;
 }
 
 .text-purple-700,
 .text-purple-500 {
-    color: var(--neu-purple) !important;
+    color: var(--vibrant-purple) !important;
 }
 
 .text-indigo-700,
 .text-indigo-500 {
-    color: var(--neu-purple) !important;
+    color: var(--vibrant-indigo) !important;
 }
 
 /* --- Range Slider --- */
 input[type="range"] {
     -webkit-appearance: none;
     appearance: none;
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(to right, var(--vibrant-blue), var(--vibrant-purple)) !important;
+    box-shadow: var(--vibrant-shadow) !important;
     border: none !important;
+    height: 8px !important;
+    border-radius: 999px !important;
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -222,21 +288,21 @@ input[type="range"]::-webkit-slider-thumb {
     appearance: none;
     width: 24px;
     height: 24px;
-    background: var(--neu-bg);
-    box-shadow: var(--neu-raised);
+    background: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     border-radius: 50%;
     cursor: pointer;
-    border: none;
+    border: 3px solid var(--vibrant-blue);
 }
 
 input[type="range"]::-moz-range-thumb {
     width: 24px;
     height: 24px;
-    background: var(--neu-bg);
-    box-shadow: var(--neu-raised);
+    background: white;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     border-radius: 50%;
     cursor: pointer;
-    border: none;
+    border: 3px solid var(--vibrant-blue);
 }
 
 /* --- Input Fields --- */
@@ -244,17 +310,17 @@ input[type="text"],
 input[type="number"],
 input[type="file"],
 select {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
-    border: none !important;
-    color: var(--neu-text) !important;
+    background: var(--vibrant-card-bg) !important;
+    box-shadow: var(--vibrant-shadow) !important;
+    border: 2px solid rgba(59, 130, 246, 0.2) !important;
+    color: var(--vibrant-text) !important;
 }
 
 input[type="text"]:focus,
 input[type="number"]:focus,
 select:focus {
-    box-shadow: inset 8px 8px 16px var(--neu-shadow-dark),
-        inset -8px -8px 16px var(--neu-shadow-light) !important;
+    border-color: var(--vibrant-blue) !important;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1), var(--vibrant-shadow) !important;
     outline: none !important;
 }
 
@@ -265,12 +331,12 @@ input[type="checkbox"] {
     -webkit-appearance: none;
     width: 60px;
     height: 32px;
-    background: var(--neu-bg);
-    box-shadow: var(--neu-inset);
+    background: #e2e8f0;
     border-radius: 32px;
     position: relative;
     cursor: pointer;
     transition: all 0.3s ease;
+    border: 2px solid #cbd5e1;
 }
 
 input[type="checkbox"]:before {
@@ -278,12 +344,17 @@ input[type="checkbox"]:before {
     position: absolute;
     width: 24px;
     height: 24px;
-    background: var(--neu-bg);
-    box-shadow: var(--neu-raised);
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     border-radius: 50%;
-    top: 4px;
-    left: 4px;
+    top: 2px;
+    left: 2px;
     transition: all 0.3s ease;
+}
+
+input[type="checkbox"]:checked {
+    background: var(--vibrant-blue-gradient);
+    border-color: var(--vibrant-blue);
 }
 
 input[type="checkbox"]:checked:before {
@@ -292,15 +363,16 @@ input[type="checkbox"]:checked:before {
 
 /* --- Drag & Drop Zone --- */
 .border-dashed {
-    border-style: solid !important;
-    border-width: 0 !important;
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    border-style: dashed !important;
+    border-width: 3px !important;
+    background: linear-gradient(135deg, #f8f9ff 0%, #eff6ff 100%) !important;
+    border-color: var(--vibrant-blue-light) !important;
 }
 
 .border-dashed:hover {
-    box-shadow: inset 8px 8px 16px var(--neu-shadow-dark),
-        inset -8px -8px 16px var(--neu-shadow-light) !important;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+    border-color: var(--vibrant-blue) !important;
+    box-shadow: var(--vibrant-shadow) !important;
 }
 
 /* --- Icons Colors --- */
@@ -312,33 +384,34 @@ svg {
 
 /* Upload Icon Container */
 .bg-slate-100 svg {
-    color: var(--neu-blue) !important;
+    color: var(--vibrant-blue) !important;
 }
 
 /* Mode Toggle Active State */
 .shadow {
-    box-shadow: var(--neu-raised) !important;
+    box-shadow: var(--vibrant-shadow) !important;
 }
 
 /* Pressed/Active State for Toggles */
 button.shadow.text-blue-600 {
-    box-shadow: var(--neu-inset) !important;
+    background: var(--vibrant-blue-gradient) !important;
+    color: white !important;
 }
 
 /* --- Progress Bars --- */
 .bg-gradient-to-r {
-    background: linear-gradient(135deg, var(--neu-blue), var(--neu-purple)) !important;
-    box-shadow: none !important;
+    background: var(--vibrant-blue-gradient) !important;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
 }
 
 /* --- Circular Progress --- */
 circle {
-    stroke: var(--neu-blue) !important;
+    stroke: var(--vibrant-blue) !important;
 }
 
 /* --- Focus States --- */
 *:focus-visible {
-    outline: 2px solid var(--neu-blue) !important;
+    outline: 3px solid var(--vibrant-blue) !important;
     outline-offset: 2px;
 }
 
@@ -353,21 +426,45 @@ circle {
 /* --- Hover Effects for Cards --- */
 .hover\:border-blue-200:hover,
 .hover\:border-blue-300:hover,
-.hover\:border-blue-400:hover,
-.hover\:border-green-300:hover,
-.hover\:border-red-300:hover,
+.hover\:border-blue-400:hover {
+    border-color: var(--vibrant-blue) !important;
+    box-shadow: var(--vibrant-shadow-lg) !important;
+    transform: translateY(-2px) !important;
+}
+
+.hover\:border-green-300:hover {
+    border-color: var(--vibrant-green) !important;
+    box-shadow: var(--vibrant-shadow-green) !important;
+    transform: translateY(-2px) !important;
+}
+
+.hover\:border-red-300:hover {
+    border-color: var(--vibrant-red) !important;
+    box-shadow: var(--vibrant-shadow-pink) !important;
+    transform: translateY(-2px) !important;
+}
+
 .hover\:border-indigo-300:hover {
-    border-color: transparent !important;
-    box-shadow: 10px 10px 20px var(--neu-shadow-dark),
-        -10px -10px 20px var(--neu-shadow-light) !important;
+    border-color: var(--vibrant-indigo) !important;
+    box-shadow: var(--vibrant-shadow-purple) !important;
+    transform: translateY(-2px) !important;
 }
 
 /* --- Hover Background Colors --- */
-.hover\:bg-slate-50:hover,
-.hover\:bg-blue-50:hover,
-.hover\:bg-green-50:hover,
+.hover\:bg-slate-50:hover {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+}
+
+.hover\:bg-blue-50:hover {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+}
+
+.hover\:bg-green-50:hover {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+}
+
 .hover\:bg-red-50:hover {
-    background: var(--neu-bg) !important;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
 }
 
 /* --- Smooth Transitions --- */
@@ -375,45 +472,48 @@ circle {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
-/* --- Remove Box Shadows from Tailwind --- */
-.shadow-sm,
-.shadow-md,
+/* --- Vibrant Box Shadows --- */
+.shadow-sm {
+    box-shadow: var(--vibrant-shadow) !important;
+}
+
+.shadow-md {
+    box-shadow: var(--vibrant-shadow) !important;
+}
+
 .shadow-lg {
-    box-shadow: var(--neu-raised) !important;
+    box-shadow: var(--vibrant-shadow-lg) !important;
 }
 
 /* --- Specific Color Adjustments --- */
 .text-white {
-    color: var(--neu-text) !important;
-}
-
-/* Keep white text only for specific cases */
-button .text-white,
-.bg-blue-600 span,
-.bg-green-500 span,
-.bg-red-500 span {
-    color: inherit !important;
+    color: white !important;
 }
 
 /* --- Notification/Alert Backgrounds --- */
 .bg-blue-100 {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%) !important;
+    border: 2px solid var(--vibrant-blue-light) !important;
 }
 
 .bg-green-100 {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%) !important;
+    border: 2px solid var(--vibrant-green-light) !important;
 }
 
 .bg-red-100 {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%) !important;
+    border: 2px solid var(--vibrant-red-light) !important;
 }
 
 .bg-amber-100 {
-    background: var(--neu-bg) !important;
-    box-shadow: var(--neu-inset) !important;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%) !important;
+    border: 2px solid var(--vibrant-amber-light) !important;
+}
+
+.bg-purple-100 {
+    background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%) !important;
+    border: 2px solid var(--vibrant-purple-light) !important;
 }
 
 /* --- Opacity Adjustments --- */
@@ -441,6 +541,117 @@ button .text-white,
     }
 }
 
+@keyframes pulse-glow {
+
+    0%,
+    100% {
+        box-shadow: var(--vibrant-shadow);
+    }
+
+    50% {
+        box-shadow: var(--vibrant-shadow-lg);
+    }
+}
+
+/* --- Special Component Styles --- */
+
+/* Difficulty Level Buttons */
+.border-green-500.bg-green-50 {
+    background: var(--vibrant-green-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: var(--vibrant-shadow-green) !important;
+}
+
+.border-blue-500.bg-blue-50 {
+    background: var(--vibrant-blue-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: var(--vibrant-shadow) !important;
+}
+
+.border-red-500.bg-red-50 {
+    background: var(--vibrant-red-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: var(--vibrant-shadow-pink) !important;
+}
+
+.border-indigo-500.bg-indigo-50 {
+    background: var(--vibrant-indigo-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: var(--vibrant-shadow-purple) !important;
+}
+
+/* Language Selection Buttons */
+.border-indigo-500.bg-indigo-50.text-indigo-700 {
+    background: var(--vibrant-indigo-gradient) !important;
+    color: white !important;
+}
+
+/* Topic Filter Buttons */
+button.border-indigo-500 {
+    background: var(--vibrant-indigo-gradient) !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* Quiz Option Buttons */
+.border-green-500.bg-green-50.text-green-700 {
+    background: var(--vibrant-green-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4) !important;
+}
+
+.border-red-500.bg-red-50.text-red-700 {
+    background: var(--vibrant-red-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* Flashcard Back */
+.bg-slate-800.text-white {
+    background: linear-gradient(135deg, #1e293b 0%, #334155 100%) !important;
+}
+
+/* Timer Display */
+.bg-red-100.text-red-700 {
+    background: var(--vibrant-red-gradient) !important;
+    color: white !important;
+    animation: pulse-glow 2s infinite;
+}
+
+.bg-amber-100.text-amber-700 {
+    background: var(--vibrant-amber-gradient) !important;
+    color: white !important;
+}
+
+.bg-slate-100.text-slate-700,
+.bg-slate-100.text-slate-600 {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+    color: var(--vibrant-text-secondary) !important;
+}
+
+/* Tag Badges */
+.bg-blue-100.text-blue-700 {
+    background: var(--vibrant-blue) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    padding: 4px 12px !important;
+    border-radius: 999px !important;
+}
+
+.bg-purple-100.text-purple-700 {
+    background: var(--vibrant-purple) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    padding: 4px 12px !important;
+    border-radius: 999px !important;
+}
+
 /* --- Accessibility --- */
 @media (prefers-reduced-motion: reduce) {
     * {
@@ -453,17 +664,14 @@ button .text-white,
 /* --- Mobile Optimizations --- */
 @media (max-width: 768px) {
     button {
-        box-shadow: 6px 6px 12px var(--neu-shadow-dark),
-            -6px -6px 12px var(--neu-shadow-light) !important;
+        box-shadow: var(--vibrant-shadow) !important;
     }
 
     button:hover:not(:disabled) {
-        box-shadow: 6px 6px 12px var(--neu-shadow-dark),
-            -6px -6px 12px var(--neu-shadow-light) !important;
+        box-shadow: var(--vibrant-shadow) !important;
     }
 
     .bg-white {
-        box-shadow: 6px 6px 12px var(--neu-shadow-dark),
-            -6px -6px 12px var(--neu-shadow-light) !important;
+        box-shadow: var(--vibrant-shadow) !important;
     }
 }
