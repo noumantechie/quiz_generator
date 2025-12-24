@@ -87,7 +87,9 @@ const UploadStage = ({ onUpload, mode, setMode, numQuestions, setNumQuestions, d
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold text-slate-800">Document to Quiz</h2>
+        <h2 className="text-3xl font-bold text-slate-800">
+          {mode === 'quiz' ? 'Document to Quiz' : 'Document to FlashCards'}
+        </h2>
         <p className="text-slate-500">Upload your notes and let AI test your knowledge.</p>
       </div>
 
