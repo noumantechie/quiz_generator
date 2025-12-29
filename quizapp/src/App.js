@@ -13,11 +13,12 @@ import {
   Globe,
   Zap,
   Filter,
-  AlertCircle
+  AlertCircle,
+  Sparkles,
+  ChevronDown
 } from 'lucide-react';
 
 /* --- 1. API CONFIGURATION --- */
-// Use the same host as frontend, but port 5000 for backend
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || `http://${window.location.hostname}:5000`;
 
 /* --- 2. API FUNCTIONS --- */
@@ -63,16 +64,26 @@ const generateQuizOrFlashcard = async (sessionId, mode, numQuestions, difficulty
 
 /* --- 3. SUB-COMPONENTS --- */
 
-// A. Upload Stage
+// A. Upload Stage - Redesigned
 const UploadStage = ({ onUpload, mode, setMode, numQuestions, setNumQuestions, difficulty, setDifficulty, language, setLanguage, timerEnabled, setTimerEnabled, timeLimit, setTimeLimit, availableTopics, selectedTopic, setSelectedTopic }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    // Simulate file acceptance
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      onUpload(e.dataTransfer.files[0]);
+      setSelectedFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileSelect = (file) => {
+    setSelectedFile(file);
+  };
+
+  const handleGenerate = () => {
+    if (selectedFile) {
+      onUpload(selectedFile);
     }
   };
 
@@ -84,222 +95,246 @@ const UploadStage = ({ onUpload, mode, setMode, numQuestions, setNumQuestions, d
     { code: 'ar', name: 'العربية', flag: '🇸🇦' }
   ];
 
+  const selectedLanguage = languages.find(l => l.code === language);
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="text-center space-y-2">
-        <h2 className="text-3xl font-bold text-slate-800">
-          {mode === 'quiz' ? 'Document to Quiz' : 'Document to FlashCards'}
-        </h2>
-        <p className="text-slate-500">Upload your notes and let AI test your knowledge.</p>
+    <div className="max-w-6xl mx-auto">
+      {/* Hero Section */}
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <Sparkles className="w-4 h-4" />
+          <span>AI-Powered Learning Assistant</span>
+        </div>
+        <h1 className="text-5xl font-bold text-slate-900 mb-4">
+          Transform Documents into {mode === 'quiz' ? 'Quizzes' : 'Flashcards'}
+        </h1>
+        <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+          Upload your study materials and let AI create personalized learning content in seconds
+        </p>
       </div>
 
-      {/* Drag & Drop Zone */}
-      <div
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-        onClick={() => document.getElementById('file-upload').click()}
-        className={`border-2 border-dashed rounded-xl p-12 text-center transition-all cursor-pointer relative
-          ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-slate-300 hover:border-blue-400 hover:bg-slate-50'}`}
-      >
-        <div className="flex flex-col items-center gap-4">
-          <div className={`p-4 rounded-full ${isDragging ? 'bg-blue-100' : 'bg-slate-100'}`}>
-            <Upload className={`w-8 h-8 ${isDragging ? 'text-blue-600' : 'text-slate-400'}`} />
-          </div>
-          <div>
-            <p className="text-lg font-medium text-slate-700">Click to upload or drag and drop</p>
-            <p className="text-sm text-slate-400 mt-1">PDF, DOCX, or TXT (Max 10MB)</p>
-          </div>
-        </div>
-        <input
-          type="file"
-          className="hidden"
-          onChange={(e) => e.target.files[0] && onUpload(e.target.files[0])}
-          id="file-upload"
-          accept=".pdf,.docx,.txt"
-        />
-      </div>
-
-      {/* Mode Toggle */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Brain className="w-6 h-6 text-blue-600" />
-          <div>
-            <h3 className="font-semibold text-slate-800">Generation Mode</h3>
-            <p className="text-sm text-slate-500">Choose how you want to learn</p>
-          </div>
-        </div>
-        <div className="flex bg-slate-100 p-1 rounded-lg">
-          <button
-            onClick={() => setMode('quiz')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${mode === 'quiz' ? 'bg-white shadow text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Left Column - Upload Area (Larger) */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Upload Zone */}
+          <div
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+            onClick={() => document.getElementById('file-upload').click()}
+            className={`relative border-2 border-dashed rounded-2xl p-16 text-center transition-all cursor-pointer group
+              ${isDragging ? 'border-blue-500 bg-blue-50 scale-[1.02]' :
+                selectedFile ? 'border-green-500 bg-green-50' :
+                  'border-slate-300 hover:border-blue-400 hover:bg-slate-50'}`}
           >
-            Quiz
-          </button>
-          <button
-            onClick={() => setMode('flashcard')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${mode === 'flashcard' ? 'bg-white shadow text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            Flashcards
-          </button>
-        </div>
-      </div>
-
-      {/* Difficulty Level */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <div className="flex items-center gap-3 mb-4">
-          <Zap className="w-5 h-5 text-amber-500" />
-          <div>
-            <h3 className="font-semibold text-slate-800">Difficulty Level</h3>
-            <p className="text-sm text-slate-500">Adjust question complexity</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-3">
-          <button
-            onClick={() => setDifficulty('basic')}
-            className={`px-4 py-3 rounded-lg text-sm font-medium transition-all border-2 ${difficulty === 'basic' ? 'border-green-500 bg-green-50 text-green-700' : 'border-slate-200 hover:border-green-300 text-slate-600'}`}
-          >
-            <div className="font-bold">Basic</div>
-            <div className="text-xs opacity-75">Simple recall</div>
-          </button>
-          <button
-            onClick={() => setDifficulty('medium')}
-            className={`px-4 py-3 rounded-lg text-sm font-medium transition-all border-2 ${difficulty === 'medium' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-200 hover:border-blue-300 text-slate-600'}`}
-          >
-            <div className="font-bold">Medium</div>
-            <div className="text-xs opacity-75">Moderate</div>
-          </button>
-          <button
-            onClick={() => setDifficulty('advanced')}
-            className={`px-4 py-3 rounded-lg text-sm font-medium transition-all border-2 ${difficulty === 'advanced' ? 'border-red-500 bg-red-50 text-red-700' : 'border-slate-200 hover:border-red-300 text-slate-600'}`}
-          >
-            <div className="font-bold">Advanced</div>
-            <div className="text-xs opacity-75">Complex</div>
-          </button>
-        </div>
-      </div>
-
-      {/* Language Selection */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <div className="flex items-center gap-3 mb-4">
-          <Globe className="w-5 h-5 text-indigo-500" />
-          <div>
-            <h3 className="font-semibold text-slate-800">Language</h3>
-            <p className="text-sm text-slate-500">Select quiz language</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-          {languages.map(lang => (
-            <button
-              key={lang.code}
-              onClick={() => setLanguage(lang.code)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-all border-2 flex items-center justify-center gap-2 ${language === lang.code ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-slate-200 hover:border-indigo-300 text-slate-600'}`}
-            >
-              <span>{lang.flag}</span>
-              <span>{lang.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Number of Questions */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <label className="block text-sm font-semibold text-slate-700 mb-3">Number of Questions</label>
-        <input
-          type="range"
-          min="3"
-          max="20"
-          value={numQuestions}
-          onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-          className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-        />
-        <div className="flex justify-between mt-2 text-sm text-slate-500">
-          <span>3</span>
-          <span className="font-bold text-blue-600">{numQuestions}</span>
-          <span>20</span>
-        </div>
-      </div>
-
-      {/* Topic Filter - Only show after topics are available */}
-      {availableTopics && availableTopics.length > 0 && (
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-          <div className="flex items-center gap-3 mb-4">
-            <Filter className="w-5 h-5 text-indigo-500" />
-            <div>
-              <h3 className="font-semibold text-slate-800">Topic Filter</h3>
-              <p className="text-sm text-slate-500">Select specific topics or all</p>
+            <div className="flex flex-col items-center gap-6">
+              <div className={`p-6 rounded-2xl transition-all ${isDragging ? 'bg-blue-100 scale-110' :
+                  selectedFile ? 'bg-green-100' :
+                    'bg-slate-100 group-hover:bg-blue-50 group-hover:scale-105'
+                }`}>
+                {selectedFile ? (
+                  <CheckCircle className="w-12 h-12 text-green-600" />
+                ) : (
+                  <Upload className={`w-12 h-12 ${isDragging ? 'text-blue-600' : 'text-slate-400 group-hover:text-blue-500'}`} />
+                )}
+              </div>
+              <div>
+                {selectedFile ? (
+                  <>
+                    <p className="text-lg font-semibold text-green-700 mb-1">{selectedFile.name}</p>
+                    <p className="text-sm text-green-600">File ready • Click to change</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-2xl font-semibold text-slate-800 mb-2">Drop your document here</p>
+                    <p className="text-slate-500 mb-1">or click to browse</p>
+                    <p className="text-sm text-slate-400">Supports PDF, DOCX, TXT • Max 10MB</p>
+                  </>
+                )}
+              </div>
             </div>
+            <input
+              type="file"
+              className="hidden"
+              onChange={(e) => e.target.files[0] && handleFileSelect(e.target.files[0])}
+              id="file-upload"
+              accept=".pdf,.docx,.txt"
+            />
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setSelectedTopic(null)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border-2 ${selectedTopic === null
-                ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                : 'border-slate-200 hover:border-indigo-300 text-slate-600'
-                }`}
-            >
-              All Topics
-            </button>
-            {availableTopics.map(topic => (
+
+          {/* Mode Toggle - Horizontal */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <label className="block text-sm font-semibold text-slate-700 mb-3">Generation Mode</label>
+            <div className="grid grid-cols-2 gap-3">
               <button
-                key={topic}
-                onClick={() => setSelectedTopic(topic)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all border-2 ${selectedTopic === topic
-                  ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                  : 'border-slate-200 hover:border-indigo-300 text-slate-600'
+                onClick={() => setMode('quiz')}
+                className={`p-4 rounded-xl border-2 transition-all text-left ${mode === 'quiz'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
                   }`}
               >
-                {topic}
+                <div className="flex items-center gap-3 mb-2">
+                  <Brain className={`w-5 h-5 ${mode === 'quiz' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <span className={`font-semibold ${mode === 'quiz' ? 'text-blue-900' : 'text-slate-700'}`}>Quiz</span>
+                </div>
+                <p className="text-sm text-slate-500">Test your knowledge with questions</p>
               </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Timer Settings */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <Clock className="w-5 h-5 text-purple-500" />
-            <div>
-              <h3 className="font-semibold text-slate-800">Session Timer</h3>
-              <p className="text-sm text-slate-500">Optional time limit</p>
+              <button
+                onClick={() => setMode('flashcard')}
+                className={`p-4 rounded-xl border-2 transition-all text-left ${mode === 'flashcard'
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50'
+                  }`}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Lightbulb className={`w-5 h-5 ${mode === 'flashcard' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  <span className={`font-semibold ${mode === 'flashcard' ? 'text-blue-900' : 'text-slate-700'}`}>Flashcards</span>
+                </div>
+                <p className="text-sm text-slate-500">Learn with interactive cards</p>
+              </button>
             </div>
           </div>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={timerEnabled}
-              onChange={(e) => setTimerEnabled(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
         </div>
-        {timerEnabled && (
-          <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-            <label className="block text-sm text-slate-600 mb-2">Time limit (minutes)</label>
-            <input
-              type="number"
-              min="1"
-              max="60"
-              value={timeLimit}
-              onChange={(e) => setTimeLimit(parseInt(e.target.value) || 5)}
-              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
+
+        {/* Right Column - Settings */}
+        <div className="space-y-6">
+          {/* Difficulty */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <label className="block text-sm font-semibold text-slate-700 mb-3">Difficulty Level</label>
+            <div className="space-y-2">
+              {[
+                { value: 'basic', label: 'Basic', color: 'green', desc: 'Simple recall' },
+                { value: 'medium', label: 'Medium', color: 'blue', desc: 'Moderate complexity' },
+                { value: 'advanced', label: 'Advanced', color: 'purple', desc: 'Critical thinking' }
+              ].map(({ value, label, color, desc }) => (
+                <button
+                  key={value}
+                  onClick={() => setDifficulty(value)}
+                  className={`w-full p-3 rounded-lg border-2 transition-all text-left ${difficulty === value
+                      ? `border-${color}-500 bg-${color}-50`
+                      : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className={`font-medium ${difficulty === value ? `text-${color}-900` : 'text-slate-700'}`}>
+                        {label}
+                      </div>
+                      <div className="text-xs text-slate-500">{desc}</div>
+                    </div>
+                    {difficulty === value && (
+                      <CheckCircle className={`w-5 h-5 text-${color}-600`} />
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-        )}
+
+          {/* Language Dropdown */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <label className="block text-sm font-semibold text-slate-700 mb-3">Language</label>
+            <div className="relative">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full appearance-none bg-white border-2 border-slate-200 rounded-lg px-4 py-3 pr-10 font-medium text-slate-700 hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer transition-all"
+              >
+                {languages.map(lang => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.flag} {lang.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* Number of Questions */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <label className="block text-sm font-semibold text-slate-700 mb-3">
+              Number of Questions
+            </label>
+            <div className="flex items-center gap-4 mb-3">
+              <input
+                type="range"
+                min="3"
+                max="20"
+                value={numQuestions}
+                onChange={(e) => setNumQuestions(parseInt(e.target.value))}
+                className="flex-1 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+              />
+              <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
+                <span className="text-lg font-bold text-blue-600">{numQuestions}</span>
+              </div>
+            </div>
+            <div className="flex justify-between text-xs text-slate-500">
+              <span>Min: 3</span>
+              <span>Max: 20</span>
+            </div>
+          </div>
+
+          {/* Timer Toggle */}
+          <div className="bg-white rounded-xl border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="text-sm font-semibold text-slate-700">Session Timer</div>
+                <div className="text-xs text-slate-500">Optional time limit</div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={timerEnabled}
+                  onChange={(e) => setTimerEnabled(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </div>
+            {timerEnabled && (
+              <div className="pt-4 border-t border-slate-100">
+                <input
+                  type="number"
+                  min="1"
+                  max="60"
+                  value={timeLimit}
+                  onChange={(e) => setTimeLimit(parseInt(e.target.value) || 5)}
+                  className="w-full px-4 py-2 border-2 border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Minutes"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Generate Button - Prominent CTA */}
+      <div className="mt-8 flex justify-center">
+        <button
+          onClick={handleGenerate}
+          disabled={!selectedFile}
+          className={`group relative px-12 py-5 rounded-xl font-semibold text-lg transition-all ${selectedFile
+              ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105'
+              : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+            }`}
+        >
+          <span className="flex items-center gap-3">
+            <Sparkles className="w-6 h-6" />
+            Generate {mode === 'quiz' ? 'Quiz' : 'Flashcards'}
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </span>
+        </button>
       </div>
     </div>
   );
 };
 
-// B. Quiz View
+// B. Quiz View - Improved
 const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [score, setScore] = useState(0);
-  const [history, setHistory] = useState([]); // To track weak topics
+  const [history, setHistory] = useState([]);
   const [timeElapsed, setTimeElapsed] = useState(0);
   const [isTimeUp, setIsTimeUp] = useState(false);
 
@@ -307,8 +342,8 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   const isAnswered = selectedOption !== null;
   const timeLimitSeconds = timeLimit * 60;
   const timeRemaining = timeLimitSeconds - timeElapsed;
+  const progress = ((currentIndex + 1) / data.length) * 100;
 
-  // Timer effect - Fixed with useRef to avoid stale closures
   const scoreRef = React.useRef(score);
   const historyRef = React.useRef(history);
   const dataRef = React.useRef(data);
@@ -326,7 +361,6 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
         if (timerEnabled && newTime >= timeLimitSeconds) {
           setIsTimeUp(true);
           clearInterval(interval);
-          // Auto-complete quiz when time is up
           setTimeout(() => {
             setHistory(latestHistory => {
               onComplete({
@@ -360,7 +394,6 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
     const isCorrect = index === currentQ.correctIndex;
     if (isCorrect) setScore(s => s + 1);
 
-    // Save history for analytics - use functional update to avoid race condition
     setHistory(prevHistory => [...prevHistory, { ...currentQ, userCorrect: isCorrect }]);
   };
 
@@ -369,60 +402,70 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
       setCurrentIndex(c => c + 1);
       setSelectedOption(null);
     } else {
-      // Use functional state update to get the latest history
       setHistory(latestHistory => {
         onComplete({ score, total: data.length, history: latestHistory, type: 'quiz', timeElapsed });
-        return latestHistory; // Return unchanged to avoid unnecessary updates
+        return latestHistory;
       });
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Progress and Timer */}
-      <div className="flex justify-between items-center mb-6">
-        <span className="text-sm font-medium text-slate-500">Question {currentIndex + 1} of {data.length}</span>
-        <div className="flex items-center gap-4">
-          <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs">{currentQ.tag}</span>
-          {timerEnabled ? (
-            <div className={`flex items-center gap-2 px-3 py-1 rounded-lg font-medium text-sm ${timeRemaining < 60 ? 'bg-red-100 text-red-700' :
-              timeRemaining < 180 ? 'bg-amber-100 text-amber-700' :
-                'bg-slate-100 text-slate-700'
-              }`}>
-              <Clock className="w-4 h-4" />
-              <span>{formatTime(timeRemaining)}</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-100 text-slate-600 font-medium text-sm">
-              <Clock className="w-4 h-4" />
-              <span>{formatTime(timeElapsed)}</span>
-            </div>
-          )}
+    <div className="max-w-4xl mx-auto">
+      {/* Progress Bar */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm font-medium text-slate-600">
+            Question {currentIndex + 1} of {data.length}
+          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+              {currentQ.tag}
+            </span>
+            {timerEnabled ? (
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-semibold text-sm ${timeRemaining < 60 ? 'bg-red-100 text-red-700' :
+                  timeRemaining < 180 ? 'bg-amber-100 text-amber-700' :
+                    'bg-slate-100 text-slate-700'
+                }`}>
+                <Clock className="w-4 h-4" />
+                <span>{formatTime(timeRemaining)}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 font-semibold text-sm">
+                <Clock className="w-4 h-4" />
+                <span>{formatTime(timeElapsed)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className="absolute h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-out"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
 
       {isTimeUp && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2 animate-in fade-in">
-          <Clock className="w-5 h-5" />
-          <span className="font-medium">Time's up! Quiz completed.</span>
+        <div className="mb-6 bg-red-50 border-2 border-red-200 text-red-700 px-6 py-4 rounded-xl flex items-center gap-3">
+          <Clock className="w-6 h-6" />
+          <span className="font-semibold">Time's up! Quiz completed.</span>
         </div>
       )}
 
       {/* Question Card */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 mb-6">
-        <h3 className="text-xl font-semibold text-slate-800 mb-6 leading-relaxed">
+      <div className="bg-white rounded-2xl border border-slate-200 p-10 mb-8 shadow-sm">
+        <h3 className="text-2xl font-bold text-slate-900 mb-8 leading-relaxed">
           {currentQ.question}
         </h3>
 
         <div className="space-y-3">
           {currentQ.options.map((opt, idx) => {
-            let baseStyle = "w-full text-left p-4 rounded-lg border-2 transition-all flex justify-between items-center ";
-            let statusStyle = "border-slate-100 hover:border-blue-200 hover:bg-slate-50"; // Default
+            let statusStyle = "border-slate-200 hover:border-blue-300 hover:bg-blue-50/50";
 
             if (isAnswered) {
-              if (idx === currentQ.correctIndex) statusStyle = "border-green-500 bg-green-50 text-green-700";
-              else if (idx === selectedOption) statusStyle = "border-red-500 bg-red-50 text-red-700";
-              else statusStyle = "border-slate-100 opacity-50";
+              if (idx === currentQ.correctIndex) statusStyle = "border-green-500 bg-green-50";
+              else if (idx === selectedOption) statusStyle = "border-red-500 bg-red-50";
+              else statusStyle = "border-slate-100 opacity-60";
             }
 
             return (
@@ -430,31 +473,30 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
                 key={idx}
                 disabled={isAnswered || isTimeUp}
                 onClick={() => handleOptionClick(idx)}
-                className={baseStyle + statusStyle}
+                className={`w-full text-left p-5 rounded-xl border-2 transition-all flex justify-between items-center group ${statusStyle}`}
               >
-                <span className="font-medium">{opt}</span>
-                {isAnswered && idx === currentQ.correctIndex && <CheckCircle className="w-5 h-5 text-green-600" />}
-                {isAnswered && idx === selectedOption && idx !== currentQ.correctIndex && <XCircle className="w-5 h-5 text-red-600" />}
+                <span className="font-medium text-slate-800">{opt}</span>
+                {isAnswered && idx === currentQ.correctIndex && <CheckCircle className="w-6 h-6 text-green-600" />}
+                {isAnswered && idx === selectedOption && idx !== currentQ.correctIndex && <XCircle className="w-6 h-6 text-red-600" />}
               </button>
             );
           })}
         </div>
 
-        {/* Smart Feedback - Show explanation after answering */}
         {isAnswered && currentQ.explanation && (
-          <div className={`mt-6 p-4 rounded-lg border-2 animate-in fade-in slide-in-from-bottom-2 ${selectedOption === currentQ.correctIndex
-            ? 'bg-green-50 border-green-200'
-            : 'bg-blue-50 border-blue-200'
+          <div className={`mt-8 p-6 rounded-xl border-2 ${selectedOption === currentQ.correctIndex
+              ? 'bg-green-50 border-green-200'
+              : 'bg-blue-50 border-blue-200'
             }`}>
-            <div className="flex gap-3">
-              <AlertCircle className={`w-5 h-5 mt-0.5 flex-shrink-0 ${selectedOption === currentQ.correctIndex ? 'text-green-600' : 'text-blue-600'
+            <div className="flex gap-4">
+              <AlertCircle className={`w-6 h-6 mt-0.5 flex-shrink-0 ${selectedOption === currentQ.correctIndex ? 'text-green-600' : 'text-blue-600'
                 }`} />
               <div>
-                <p className={`font-semibold mb-1 ${selectedOption === currentQ.correctIndex ? 'text-green-800' : 'text-blue-800'
+                <p className={`font-bold mb-2 ${selectedOption === currentQ.correctIndex ? 'text-green-900' : 'text-blue-900'
                   }`}>
                   {selectedOption === currentQ.correctIndex ? '✓ Correct!' : 'ℹ Learn More'}
                 </p>
-                <p className={`text-sm leading-relaxed ${selectedOption === currentQ.correctIndex ? 'text-green-700' : 'text-blue-700'
+                <p className={`text-sm leading-relaxed ${selectedOption === currentQ.correctIndex ? 'text-green-800' : 'text-blue-800'
                   }`}>
                   {currentQ.explanation}
                 </p>
@@ -465,22 +507,22 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
       </div>
 
       {/* Next Button */}
-      <div className="flex justify-end h-12">
-        {(isAnswered || isTimeUp) && (
+      {(isAnswered || isTimeUp) && (
+        <div className="flex justify-end">
           <button
             onClick={handleNext}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors animate-in fade-in"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-3 transition-all hover:scale-105 shadow-lg shadow-blue-500/30"
           >
-            {currentIndex === data.length - 1 ? "Finish Quiz" : "Next Question"}
-            <ArrowRight className="w-4 h-4" />
+            {currentIndex === data.length - 1 ? "View Results" : "Next Question"}
+            <ArrowRight className="w-5 h-5" />
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// C. Flashcard View
+// C. Flashcard View - Improved
 const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -490,8 +532,8 @@ const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   const currentCard = data[currentIndex];
   const timeLimitSeconds = timeLimit * 60;
   const timeRemaining = timeLimitSeconds - timeElapsed;
+  const progress = ((currentIndex + 1) / data.length) * 100;
 
-  // Timer effect
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeElapsed(prev => prev + 1);
@@ -514,75 +556,88 @@ const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
 
     setIsFlipped(false);
     if (currentIndex < data.length - 1) {
-      setTimeout(() => setCurrentIndex(c => c + 1), 150); // Slight delay for smooth transition
+      setTimeout(() => setCurrentIndex(c => c + 1), 150);
     } else {
       onComplete({ ...stats, total: data.length, type: 'flashcard', timeElapsed });
     }
   };
 
   return (
-    <div className="max-w-xl mx-auto flex flex-col items-center">
-      <div className="w-full flex justify-between items-center mb-6 text-sm font-medium text-slate-500">
-        <span>Card {currentIndex + 1} of {data.length}</span>
-        <div className="flex items-center gap-3">
-          <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs">{currentCard.tag}</span>
-          {timerEnabled ? (
-            <div className={`flex items-center gap-2 px-3 py-1 rounded-lg font-medium text-sm ${timeRemaining < 60 ? 'bg-red-100 text-red-700' :
-              timeRemaining < 180 ? 'bg-amber-100 text-amber-700' :
-                'bg-slate-100 text-slate-700'
-              }`}>
-              <Clock className="w-4 h-4" />
-              <span>{formatTime(timeRemaining)}</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 px-3 py-1 rounded-lg bg-slate-100 text-slate-600 font-medium text-sm">
-              <Clock className="w-4 h-4" />
-              <span>{formatTime(timeElapsed)}</span>
-            </div>
-          )}
+    <div className="max-w-3xl mx-auto">
+      {/* Progress */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-sm font-medium text-slate-600">
+            Card {currentIndex + 1} of {data.length}
+          </span>
+          <div className="flex items-center gap-4">
+            <span className="text-xs font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+              {currentCard.tag}
+            </span>
+            {timerEnabled ? (
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-semibold text-sm ${timeRemaining < 60 ? 'bg-red-100 text-red-700' :
+                  timeRemaining < 180 ? 'bg-amber-100 text-amber-700' :
+                    'bg-slate-100 text-slate-700'
+                }`}>
+                <Clock className="w-4 h-4" />
+                <span>{formatTime(timeRemaining)}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-100 text-slate-600 font-semibold text-sm">
+                <Clock className="w-4 h-4" />
+                <span>{formatTime(timeElapsed)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            className="absolute h-full bg-gradient-to-r from-purple-500 to-purple-600 transition-all duration-500 ease-out"
+            style={{ width: `${progress}%` }}
+          />
         </div>
       </div>
 
       {/* Card Container */}
       <div
-        className="group perspective w-full h-80 cursor-pointer"
+        className="group perspective w-full h-96 cursor-pointer mb-8"
         onClick={() => setIsFlipped(!isFlipped)}
       >
         <div className={`relative w-full h-full duration-500 preserve-3d transition-all transform ${isFlipped ? 'rotate-y-180' : ''}`}
           style={{ transformStyle: 'preserve-3d', transform: isFlipped ? 'rotateY(180deg)' : '' }}>
 
           {/* Front */}
-          <div className="absolute inset-0 backface-hidden bg-white border border-slate-200 shadow-md rounded-2xl flex items-center justify-center p-8 text-center"
+          <div className="absolute inset-0 backface-hidden bg-white border-2 border-slate-200 shadow-xl rounded-3xl flex items-center justify-center p-12 text-center hover:shadow-2xl transition-shadow"
             style={{ backfaceVisibility: 'hidden' }}>
             <div>
-              <p className="text-xs uppercase tracking-wider text-slate-400 mb-4 font-semibold">Term / Question</p>
-              <h3 className="text-2xl font-bold text-slate-800">{currentCard.front}</h3>
-              <p className="text-sm text-slate-400 mt-8">(Click to flip)</p>
+              <p className="text-xs uppercase tracking-wider text-slate-400 mb-6 font-semibold">Term / Question</p>
+              <h3 className="text-3xl font-bold text-slate-900 mb-8">{currentCard.front}</h3>
+              <p className="text-sm text-slate-400">Click to flip</p>
             </div>
           </div>
 
           {/* Back */}
-          <div className="absolute inset-0 backface-hidden bg-slate-800 text-white shadow-md rounded-2xl flex items-center justify-center p-8 text-center rotate-y-180"
+          <div className="absolute inset-0 backface-hidden bg-gradient-to-br from-slate-800 to-slate-900 text-white shadow-xl rounded-3xl flex items-center justify-center p-12 text-center rotate-y-180"
             style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
             <div>
-              <p className="text-xs uppercase tracking-wider text-slate-400 mb-4 font-semibold">Definition / Answer</p>
-              <h3 className="text-xl font-medium leading-relaxed">{currentCard.back}</h3>
+              <p className="text-xs uppercase tracking-wider text-slate-400 mb-6 font-semibold">Definition / Answer</p>
+              <h3 className="text-2xl font-medium leading-relaxed">{currentCard.back}</h3>
             </div>
           </div>
         </div>
       </div>
 
       {/* Controls */}
-      <div className={`mt-8 flex gap-4 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+      <div className={`flex gap-4 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
         <button
           onClick={(e) => { e.stopPropagation(); handleRating(false); }}
-          className="flex-1 bg-white border border-red-200 text-red-600 hover:bg-red-50 px-6 py-3 rounded-xl font-medium shadow-sm w-32 justify-center flex"
+          className="flex-1 bg-white border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 px-8 py-4 rounded-xl font-semibold shadow-sm transition-all hover:scale-105"
         >
           I didn't know
         </button>
         <button
           onClick={(e) => { e.stopPropagation(); handleRating(true); }}
-          className="flex-1 bg-blue-600 text-white hover:bg-blue-700 px-6 py-3 rounded-xl font-medium shadow-sm w-32 justify-center flex"
+          className="flex-1 bg-blue-600 text-white hover:bg-blue-700 px-8 py-4 rounded-xl font-semibold shadow-lg shadow-blue-500/30 transition-all hover:scale-105"
         >
           I knew this
         </button>
@@ -591,21 +646,18 @@ const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   );
 };
 
-// D. Dashboard / Summary View
+// D. Summary View - Improved
 const SummaryView = ({ results, onReset }) => {
   const isQuiz = results.type === 'quiz';
 
-  // Format time
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}m ${secs}s`;
   };
 
-  // Calculate statistics
   const percentage = isQuiz ? Math.round((results.score / results.total) * 100) : Math.round((results.known / results.total) * 100);
 
-  // Calculate weak topics if quiz
   const weakTopics = isQuiz ? results.history.reduce((acc, curr) => {
     if (!curr.userCorrect) {
       acc[curr.tag] = (acc[curr.tag] || 0) + 1;
@@ -613,7 +665,6 @@ const SummaryView = ({ results, onReset }) => {
     return acc;
   }, {}) : {};
 
-  // Calculate topic statistics for visualization
   const topicStats = isQuiz ? results.history.reduce((acc, curr) => {
     if (!acc[curr.tag]) {
       acc[curr.tag] = { correct: 0, total: 0 };
@@ -624,110 +675,103 @@ const SummaryView = ({ results, onReset }) => {
   }, {}) : {};
 
   return (
-    <div className="max-w-2xl mx-auto animate-in fade-in duration-500">
-      <div className="text-center mb-10">
-        <h2 className="text-3xl font-bold text-slate-800 mb-2">Session Complete!</h2>
-        <p className="text-slate-500">Here is how you performed.</p>
+    <div className="max-w-5xl mx-auto">
+      {/* Hero */}
+      <div className="text-center mb-12">
+        <div className="inline-flex items-center gap-2 bg-green-50 text-green-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+          <CheckCircle className="w-4 h-4" />
+          <span>Session Complete</span>
+        </div>
+        <h2 className="text-5xl font-bold text-slate-900 mb-4">Great Work!</h2>
+        <p className="text-xl text-slate-600">Here's how you performed</p>
       </div>
 
-      {/* Main Score Card with Visual Progress */}
-      <div className="bg-white p-8 rounded-xl border border-slate-200 shadow-sm mb-8">
-        <div className="flex items-center justify-between mb-6">
+      {/* Main Score Card */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-10 rounded-3xl border border-blue-100 shadow-lg mb-10">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-slate-600 mb-1">Your Score</p>
-            <p className="text-5xl font-bold text-slate-800">{percentage}%</p>
-            <p className="text-sm text-slate-500 mt-1">
+            <p className="text-sm font-semibold text-slate-600 mb-2">Your Score</p>
+            <p className="text-7xl font-bold text-slate-900 mb-2">{percentage}%</p>
+            <p className="text-lg text-slate-600">
               {isQuiz ? `${results.score} out of ${results.total} correct` : `${results.known} out of ${results.total} known`}
             </p>
           </div>
-          <div className="relative w-32 h-32">
-            {/* Circular Progress Ring */}
-            <svg className="transform -rotate-90" width="128" height="128">
+          <div className="relative w-40 h-40">
+            <svg className="transform -rotate-90" width="160" height="160">
               <circle
-                cx="64"
-                cy="64"
-                r="56"
+                cx="80"
+                cy="80"
+                r="70"
                 stroke="#e2e8f0"
-                strokeWidth="12"
+                strokeWidth="16"
                 fill="none"
               />
               <circle
-                cx="64"
-                cy="64"
-                r="56"
+                cx="80"
+                cy="80"
+                r="70"
                 stroke={percentage >= 70 ? '#3b82f6' : percentage >= 50 ? '#f59e0b' : '#ef4444'}
-                strokeWidth="12"
+                strokeWidth="16"
                 fill="none"
-                strokeDasharray={`${(percentage / 100) * 351.86} 351.86`}
+                strokeDasharray={`${(percentage / 100) * 439.82} 439.82`}
                 strokeLinecap="round"
                 className="transition-all duration-1000 ease-out"
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <BarChart2 className="w-8 h-8 text-blue-600" />
+              <BarChart2 className="w-12 h-12 text-blue-600" />
             </div>
           </div>
         </div>
-
-        {/* Linear Progress Bar */}
-        <div className="relative h-3 bg-slate-100 rounded-full overflow-hidden">
-          <div
-            className={`h-full rounded-full transition-all duration-1000 ease-out ${percentage >= 70 ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-              percentage >= 50 ? 'bg-gradient-to-r from-amber-500 to-amber-600' :
-                'bg-gradient-to-r from-red-500 to-red-600'
-              }`}
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
       </div>
 
-      {/* Detailed Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <CheckCircle className="w-5 h-5 text-green-500 mb-2" />
-          <p className="text-2xl font-bold text-slate-800">{isQuiz ? results.score : results.known}</p>
-          <p className="text-xs text-slate-500">Correct</p>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <CheckCircle className="w-6 h-6 text-green-500 mb-3" />
+          <p className="text-3xl font-bold text-slate-900">{isQuiz ? results.score : results.known}</p>
+          <p className="text-sm text-slate-500 font-medium">Correct</p>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <XCircle className="w-5 h-5 text-red-500 mb-2" />
-          <p className="text-2xl font-bold text-slate-800">{results.total - (isQuiz ? results.score : results.known)}</p>
-          <p className="text-xs text-slate-500">Incorrect</p>
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <XCircle className="w-6 h-6 text-red-500 mb-3" />
+          <p className="text-3xl font-bold text-slate-900">{results.total - (isQuiz ? results.score : results.known)}</p>
+          <p className="text-sm text-slate-500 font-medium">Incorrect</p>
         </div>
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-          <FileText className="w-5 h-5 text-blue-500 mb-2" />
-          <p className="text-2xl font-bold text-slate-800">{results.total}</p>
-          <p className="text-xs text-slate-500">Total</p>
+        <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <FileText className="w-6 h-6 text-blue-500 mb-3" />
+          <p className="text-3xl font-bold text-slate-900">{results.total}</p>
+          <p className="text-sm text-slate-500 font-medium">Total</p>
         </div>
         {results.timeElapsed && (
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-            <Clock className="w-5 h-5 text-purple-500 mb-2" />
-            <p className="text-2xl font-bold text-slate-800">{Math.round(results.timeElapsed / results.total)}s</p>
-            <p className="text-xs text-slate-500">Avg/Question</p>
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <Clock className="w-6 h-6 text-purple-500 mb-3" />
+            <p className="text-3xl font-bold text-slate-900">{Math.round(results.timeElapsed / results.total)}s</p>
+            <p className="text-sm text-slate-500 font-medium">Avg/Question</p>
           </div>
         )}
       </div>
 
-      {/* Topic Performance Chart - Visual Bars */}
+      {/* Topic Performance */}
       {isQuiz && Object.keys(topicStats).length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-8">
-          <div className="flex items-center gap-2 mb-6">
-            <BarChart2 className="w-5 h-5 text-indigo-500" />
-            <h3 className="font-semibold text-slate-800">Performance by Topic</h3>
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 mb-10">
+          <div className="flex items-center gap-3 mb-6">
+            <BarChart2 className="w-6 h-6 text-indigo-500" />
+            <h3 className="text-xl font-bold text-slate-900">Performance by Topic</h3>
           </div>
-          <div className="space-y-4">
+          <div className="space-y-5">
             {Object.entries(topicStats).map(([topic, stats]) => {
               const topicPercentage = Math.round((stats.correct / stats.total) * 100);
               return (
-                <div key={topic} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-slate-700">{topic}</span>
-                    <span className="text-sm font-bold text-slate-800">{stats.correct}/{stats.total} ({topicPercentage}%)</span>
+                <div key={topic}>
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold text-slate-800">{topic}</span>
+                    <span className="text-sm font-bold text-slate-600">{stats.correct}/{stats.total} ({topicPercentage}%)</span>
                   </div>
-                  <div className="relative h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="relative h-3 bg-slate-100 rounded-full overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ease-out ${topicPercentage >= 70 ? 'bg-green-500' :
-                        topicPercentage >= 50 ? 'bg-amber-500' :
-                          'bg-red-500'
+                          topicPercentage >= 50 ? 'bg-amber-500' :
+                            'bg-red-500'
                         }`}
                       style={{ width: `${topicPercentage}%` }}
                     />
@@ -739,18 +783,18 @@ const SummaryView = ({ results, onReset }) => {
         </div>
       )}
 
-      {/* Weak Topics Section (Quiz Only) */}
+      {/* Weak Topics */}
       {isQuiz && Object.keys(weakTopics).length > 0 && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Lightbulb className="w-5 h-5 text-amber-500" />
-            <h3 className="font-semibold text-slate-800">Focus Areas - Review These Topics</h3>
+        <div className="bg-amber-50 rounded-2xl border border-amber-200 p-8 mb-10">
+          <div className="flex items-center gap-3 mb-6">
+            <Lightbulb className="w-6 h-6 text-amber-600" />
+            <h3 className="text-xl font-bold text-slate-900">Focus Areas</h3>
           </div>
           <div className="space-y-3">
             {Object.entries(weakTopics).map(([topic, count]) => (
-              <div key={topic} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg border border-slate-100">
-                <span className="font-medium text-slate-700">{topic}</span>
-                <span className="text-sm text-red-500 font-medium">Missed {count} question{count > 1 ? 's' : ''}</span>
+              <div key={topic} className="flex justify-between items-center p-4 bg-white rounded-xl border border-amber-100">
+                <span className="font-semibold text-slate-800">{topic}</span>
+                <span className="text-sm text-amber-700 font-medium">Missed {count} question{count > 1 ? 's' : ''}</span>
               </div>
             ))}
           </div>
@@ -758,39 +802,35 @@ const SummaryView = ({ results, onReset }) => {
       )}
 
       {isQuiz && Object.keys(weakTopics).length === 0 && (
-        <div className="bg-green-50 text-green-700 p-4 rounded-xl border border-green-100 text-center mb-8">
-          <p className="font-medium">Perfect score! No weak topics detected.</p>
+        <div className="bg-green-50 text-green-700 p-6 rounded-2xl border border-green-200 text-center mb-10">
+          <p className="font-semibold text-lg">🎉 Perfect score! No weak topics detected.</p>
         </div>
       )}
 
       <button
         onClick={onReset}
-        className="w-full bg-slate-800 hover:bg-slate-900 text-white py-4 rounded-xl font-medium flex items-center justify-center gap-2 transition-colors"
+        className="w-full bg-slate-900 hover:bg-slate-800 text-white py-5 rounded-xl font-semibold flex items-center justify-center gap-3 transition-all hover:scale-105 shadow-lg"
       >
-        <RotateCcw className="w-4 h-4" />
+        <RotateCcw className="w-5 h-5" />
         Start New Session
       </button>
     </div>
   );
 };
 
-/* --- 3. MAIN APP --- */
+/* --- 4. MAIN APP --- */
 const App = () => {
-  const [stage, setStage] = useState('upload'); // upload, processing, quiz, flashcard, summary, error
+  const [stage, setStage] = useState('upload');
   const [mode, setMode] = useState('quiz');
   const [data, setData] = useState(null);
   const [results, setResults] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const [error, setError] = useState(null);
   const [numQuestions, setNumQuestions] = useState(5);
-
-  // New state variables
   const [difficulty, setDifficulty] = useState('medium');
   const [language, setLanguage] = useState('en');
   const [timerEnabled, setTimerEnabled] = useState(false);
-  const [timeLimit, setTimeLimit] = useState(5); // in minutes
-
-  // Topic filtering
+  const [timeLimit, setTimeLimit] = useState(5);
   const [availableTopics, setAvailableTopics] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState(null);
 
@@ -799,15 +839,12 @@ const App = () => {
     setError(null);
 
     try {
-      // Upload document to backend
       console.log('Uploading document...');
       const uploadResponse = await uploadDocument(file);
       console.log('Upload response:', uploadResponse);
 
-      // Store session ID
       setSessionId(uploadResponse.session_id);
 
-      // Generate quiz/flashcard with new parameters
       console.log(`Generating ${mode} with difficulty: ${difficulty}, language: ${language}...`);
       const generateResponse = await generateQuizOrFlashcard(
         uploadResponse.session_id,
@@ -818,11 +855,9 @@ const App = () => {
       );
       console.log('Generate response:', generateResponse);
 
-      // Set data based on mode
       const generatedData = generateResponse.data;
       setData(generatedData);
 
-      // Extract unique topics for filtering (only for quiz mode)
       if (mode === 'quiz' && generatedData.quiz) {
         const topics = [...new Set(generatedData.quiz.map(q => q.tag))];
         setAvailableTopics(topics);
@@ -858,24 +893,30 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 font-sans selection:bg-blue-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2 font-bold text-xl text-slate-800">
-            <FileText className="w-6 h-6 text-blue-600" />
-            <span>DocuQuiz</span>
+      <header className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/30">
+              <Brain className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-2xl text-slate-900">QuizFlash</h1>
+              <p className="text-xs text-slate-500">AI-Powered Learning</p>
+            </div>
           </div>
           {stage !== 'upload' && stage !== 'summary' && (
-            <div className="text-sm font-medium text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+            <div className="flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-semibold">
+              {mode === 'quiz' ? <Brain className="w-4 h-4" /> : <Lightbulb className="w-4 h-4" />}
               {mode === 'quiz' ? 'Quiz Mode' : 'Flashcard Mode'}
             </div>
           )}
         </div>
       </header>
 
-      {/* Main Content Area */}
-      <main className="max-w-5xl mx-auto px-6 py-12">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-12">
         {stage === 'upload' && (
           <UploadStage
             onUpload={handleUpload}
@@ -898,25 +939,25 @@ const App = () => {
         )}
 
         {stage === 'processing' && (
-          <div className="flex flex-col items-center justify-center pt-20 animate-in fade-in duration-700">
-            <div className="w-16 h-16 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-6"></div>
-            <h3 className="text-xl font-semibold text-slate-800">Processing Your Document...</h3>
-            <p className="text-slate-500 mt-2">Extracting text, analyzing content, and generating {mode}s with AI</p>
-            <p className="text-xs text-slate-400 mt-4">This may take 10-30 seconds depending on document size</p>
+          <div className="flex flex-col items-center justify-center pt-32">
+            <div className="w-20 h-20 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin mb-8"></div>
+            <h3 className="text-2xl font-bold text-slate-900 mb-2">Processing Your Document...</h3>
+            <p className="text-slate-600 mb-1">Extracting text, analyzing content, and generating {mode}s with AI</p>
+            <p className="text-sm text-slate-400">This may take 10-30 seconds</p>
           </div>
         )}
 
         {stage === 'error' && (
-          <div className="max-w-2xl mx-auto animate-in fade-in duration-500">
-            <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <XCircle className="w-8 h-8 text-red-600" />
+          <div className="max-w-2xl mx-auto">
+            <div className="bg-white border-2 border-red-200 rounded-2xl p-12 text-center shadow-lg">
+              <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <XCircle className="w-10 h-10 text-red-600" />
               </div>
-              <h3 className="text-xl font-semibold text-slate-800 mb-2">Oops! Something Went Wrong</h3>
-              <p className="text-slate-600 mb-6">{error}</p>
+              <h3 className="text-2xl font-bold text-slate-900 mb-3">Oops! Something Went Wrong</h3>
+              <p className="text-slate-600 mb-8">{error}</p>
               <button
                 onClick={handleReset}
-                className="bg-slate-800 hover:bg-slate-900 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+                className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl font-semibold transition-all hover:scale-105"
               >
                 Try Again
               </button>
