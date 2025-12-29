@@ -10,7 +10,10 @@ import {
   Lightbulb,
   ArrowRight,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Sparkles,
+  Zap,
+  Target
 } from 'lucide-react';
 
 /* --- 1. API CONFIGURATION --- */
@@ -59,176 +62,296 @@ const generateQuizOrFlashcard = async (sessionId, mode, numQuestions, difficulty
 
 /* --- 3. SUB-COMPONENTS --- */
 
-// A. Upload Stage
-const UploadStage = ({ onUpload, mode, setMode, numQuestions, setNumQuestions, difficulty, setDifficulty, language, setLanguage, timerEnabled, setTimerEnabled, timeLimit, setTimeLimit, availableTopics, selectedTopic, setSelectedTopic }) => {
+// A. Upload Stage - Full Width Modern Design
+const UploadStage = ({ onUpload, mode, setMode, numQuestions, setNumQuestions, difficulty, setDifficulty, language, setLanguage, timerEnabled, setTimerEnabled, timeLimit, setTimeLimit }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
 
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      onUpload(e.dataTransfer.files[0]);
+      setSelectedFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileSelect = (file) => {
+    setSelectedFile(file);
+  };
+
+  const handleGenerate = () => {
+    if (selectedFile) {
+      onUpload(selectedFile);
     }
   };
 
   const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'ur', name: 'اردو' },
-    { code: 'es', name: 'Español' },
-    { code: 'fr', name: 'Français' },
-    { code: 'ar', name: 'العربية' }
+    { code: 'en', name: 'English', flag: '🇬🇧' },
+    { code: 'ur', name: 'اردو', flag: '🇵🇰' },
+    { code: 'es', name: 'Español', flag: '🇪🇸' },
+    { code: 'fr', name: 'Français', flag: '🇫🇷' },
+    { code: 'ar', name: 'العربية', flag: '🇸🇦' }
   ];
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-3">
-        <h1 className="text-3xl font-semibold text-gray-900">
-          {mode === 'quiz' ? 'Generate Quiz' : 'Generate Flashcards'}
-        </h1>
-        <p className="text-gray-600">Upload your document and configure your learning session</p>
-      </div>
-
-      {/* Upload Area */}
-      <div
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={handleDrop}
-        onClick={() => document.getElementById('file-upload').click()}
-        className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors ${isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-300 hover:border-gray-400 bg-white'
-          }`}
-      >
-        <div className="flex flex-col items-center gap-3">
-          <Upload className={`w-10 h-10 ${isDragging ? 'text-blue-500' : 'text-gray-400'}`} />
-          <div>
-            <p className="text-base font-medium text-gray-700">Click to upload or drag and drop</p>
-            <p className="text-sm text-gray-500 mt-1">PDF, DOCX, or TXT (Max 10MB)</p>
+    <div className="min-h-screen">
+      {/* Hero Section - Full Width */}
+      <div className="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border-b border-indigo-100">
+        <div className="max-w-7xl mx-auto px-8 py-16">
+          <div className="text-center mb-12 animate-fadeIn">
+            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm mb-6">
+              <Sparkles className="w-4 h-4 text-indigo-600" />
+              <span className="text-sm font-medium text-indigo-900">AI-Powered Learning</span>
+            </div>
+            <h1 className="text-5xl font-bold text-gray-900 mb-4">
+              Transform Your Documents into
+              <span className="block mt-2 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Interactive Learning
+              </span>
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Upload any document and instantly generate quizzes or flashcards powered by advanced AI
+            </p>
           </div>
-        </div>
-        <input
-          type="file"
-          className="hidden"
-          onChange={(e) => e.target.files[0] && onUpload(e.target.files[0])}
-          id="file-upload"
-          accept=".pdf,.docx,.txt"
-        />
-      </div>
 
-      {/* Settings */}
-      <div className="space-y-6">
-        {/* Mode Selection */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">Mode</label>
-          <div className="grid grid-cols-2 gap-3">
-            <button
-              onClick={() => setMode('quiz')}
-              className={`px-4 py-3 rounded-lg border text-sm font-medium transition-colors ${mode === 'quiz'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                }`}
-            >
-              Quiz
-            </button>
-            <button
-              onClick={() => setMode('flashcard')}
-              className={`px-4 py-3 rounded-lg border text-sm font-medium transition-colors ${mode === 'flashcard'
-                  ? 'border-blue-500 bg-blue-50 text-blue-700'
-                  : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                }`}
-            >
-              Flashcards
-            </button>
-          </div>
-        </div>
-
-        {/* Difficulty */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">Difficulty</label>
-          <div className="grid grid-cols-3 gap-3">
-            {['basic', 'medium', 'advanced'].map((level) => (
-              <button
-                key={level}
-                onClick={() => setDifficulty(level)}
-                className={`px-4 py-3 rounded-lg border text-sm font-medium capitalize transition-colors ${difficulty === level
-                    ? 'border-blue-500 bg-blue-50 text-blue-700'
-                    : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
-                  }`}
-              >
-                {level}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Language */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">Language</label>
-          <select
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-700 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+          {/* Upload Area - Full Width Hero */}
+          <div
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+            onClick={() => document.getElementById('file-upload').click()}
+            className={`relative overflow-hidden rounded-2xl transition-all duration-300 cursor-pointer group ${isDragging
+                ? 'bg-indigo-100 border-2 border-indigo-400 scale-[1.02]'
+                : selectedFile
+                  ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-400'
+                  : 'bg-white border-2 border-dashed border-indigo-200 hover:border-indigo-400 hover:shadow-xl'
+              }`}
           >
-            {languages.map(lang => (
-              <option key={lang.code} value={lang.code}>{lang.name}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Number of Questions */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
-            Number of Questions: {numQuestions}
-          </label>
-          <input
-            type="range"
-            min="3"
-            max="20"
-            value={numQuestions}
-            onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
-          />
-          <div className="flex justify-between text-xs text-gray-500 mt-1">
-            <span>3</span>
-            <span>20</span>
-          </div>
-        </div>
-
-        {/* Timer */}
-        <div className="flex items-center justify-between py-3 border-t border-gray-200">
-          <div>
-            <p className="text-sm font-medium text-gray-700">Session Timer</p>
-            <p className="text-xs text-gray-500">Set a time limit for this session</p>
-          </div>
-          <label className="relative inline-flex items-center cursor-pointer">
+            <div className="px-12 py-20">
+              <div className="flex flex-col items-center gap-6">
+                <div className={`p-6 rounded-2xl transition-all duration-300 ${isDragging
+                    ? 'bg-indigo-200 scale-110'
+                    : selectedFile
+                      ? 'bg-green-200'
+                      : 'bg-indigo-100 group-hover:bg-indigo-200 group-hover:scale-110'
+                  }`}>
+                  {selectedFile ? (
+                    <CheckCircle className="w-16 h-16 text-green-600" />
+                  ) : (
+                    <Upload className={`w-16 h-16 ${isDragging ? 'text-indigo-600' : 'text-indigo-500'}`} />
+                  )}
+                </div>
+                <div className="text-center">
+                  {selectedFile ? (
+                    <>
+                      <p className="text-2xl font-semibold text-green-700 mb-2">{selectedFile.name}</p>
+                      <p className="text-green-600">Ready to generate • Click to change file</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-2xl font-semibold text-gray-900 mb-2">
+                        {isDragging ? 'Drop your file here' : 'Click to upload or drag and drop'}
+                      </p>
+                      <p className="text-gray-600 mb-1">PDF, DOCX, or TXT files supported</p>
+                      <p className="text-sm text-gray-500">Maximum file size: 10MB</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
             <input
-              type="checkbox"
-              checked={timerEnabled}
-              onChange={(e) => setTimerEnabled(e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-500 peer-focus:outline-none after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
-          </label>
-        </div>
-
-        {timerEnabled && (
-          <div className="pl-4 border-l-2 border-gray-200">
-            <label className="block text-sm text-gray-600 mb-2">Time limit (minutes)</label>
-            <input
-              type="number"
-              min="1"
-              max="60"
-              value={timeLimit}
-              onChange={(e) => setTimeLimit(parseInt(e.target.value) || 5)}
-              className="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+              type="file"
+              className="hidden"
+              onChange={(e) => e.target.files[0] && handleFileSelect(e.target.files[0])}
+              id="file-upload"
+              accept=".pdf,.docx,.txt"
             />
           </div>
-        )}
+        </div>
+      </div>
+
+      {/* Configuration Section - Full Width Grid */}
+      <div className="bg-white">
+        <div className="max-w-7xl mx-auto px-8 py-12">
+          <div className="grid lg:grid-cols-2 gap-8">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Mode Selection */}
+              <div className="bg-gradient-to-br from-slate-50 to-gray-50 rounded-xl p-6 border border-gray-200 hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-2 mb-4">
+                  <Brain className="w-5 h-5 text-indigo-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">Learning Mode</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <button
+                    onClick={() => setMode('quiz')}
+                    className={`group relative overflow-hidden p-6 rounded-xl border-2 transition-all duration-300 ${mode === 'quiz'
+                        ? 'border-indigo-500 bg-gradient-to-br from-indigo-50 to-blue-50 shadow-lg scale-105'
+                        : 'border-gray-200 bg-white hover:border-indigo-300 hover:shadow-md'
+                      }`}
+                  >
+                    <div className="relative z-10">
+                      <Target className={`w-8 h-8 mb-3 transition-transform group-hover:scale-110 ${mode === 'quiz' ? 'text-indigo-600' : 'text-gray-400'
+                        }`} />
+                      <p className={`font-semibold mb-1 ${mode === 'quiz' ? 'text-indigo-900' : 'text-gray-700'}`}>
+                        Quiz
+                      </p>
+                      <p className="text-sm text-gray-600">Test your knowledge</p>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setMode('flashcard')}
+                    className={`group relative overflow-hidden p-6 rounded-xl border-2 transition-all duration-300 ${mode === 'flashcard'
+                        ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-pink-50 shadow-lg scale-105'
+                        : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-md'
+                      }`}
+                  >
+                    <div className="relative z-10">
+                      <Lightbulb className={`w-8 h-8 mb-3 transition-transform group-hover:scale-110 ${mode === 'flashcard' ? 'text-purple-600' : 'text-gray-400'
+                        }`} />
+                      <p className={`font-semibold mb-1 ${mode === 'flashcard' ? 'text-purple-900' : 'text-gray-700'}`}>
+                        Flashcards
+                      </p>
+                      <p className="text-sm text-gray-600">Learn with cards</p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              {/* Difficulty */}
+              <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-6 border border-orange-200 hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-2 mb-4">
+                  <Zap className="w-5 h-5 text-orange-600" />
+                  <h3 className="text-lg font-semibold text-gray-900">Difficulty Level</h3>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'basic', label: 'Basic', color: 'green' },
+                    { value: 'medium', label: 'Medium', color: 'blue' },
+                    { value: 'advanced', label: 'Advanced', color: 'red' }
+                  ].map(({ value, label, color }) => (
+                    <button
+                      key={value}
+                      onClick={() => setDifficulty(value)}
+                      className={`px-4 py-3 rounded-lg font-medium transition-all duration-300 ${difficulty === value
+                          ? `bg-${color}-500 text-white shadow-lg scale-105`
+                          : 'bg-white text-gray-700 hover:shadow-md border border-gray-200'
+                        }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column */}
+            <div className="space-y-6">
+              {/* Language */}
+              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-200 hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-2 mb-4">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+                  </svg>
+                  <h3 className="text-lg font-semibold text-gray-900">Language</h3>
+                </div>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border-2 border-blue-200 bg-white text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer hover:border-blue-300"
+                >
+                  {languages.map(lang => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.flag} {lang.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Questions Count */}
+              <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-6 border border-violet-200 hover:shadow-lg transition-shadow">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <BarChart2 className="w-5 h-5 text-violet-600" />
+                    <h3 className="text-lg font-semibold text-gray-900">Questions</h3>
+                  </div>
+                  <div className="bg-violet-600 text-white px-4 py-2 rounded-lg font-bold text-lg">
+                    {numQuestions}
+                  </div>
+                </div>
+                <input
+                  type="range"
+                  min="3"
+                  max="20"
+                  value={numQuestions}
+                  onChange={(e) => setNumQuestions(parseInt(e.target.value))}
+                  className="w-full h-3 bg-violet-200 rounded-lg appearance-none cursor-pointer accent-violet-600 hover:accent-violet-700"
+                />
+                <div className="flex justify-between text-sm text-gray-600 mt-2">
+                  <span>3 min</span>
+                  <span>20 max</span>
+                </div>
+              </div>
+
+              {/* Timer */}
+              <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-6 border border-rose-200 hover:shadow-lg transition-shadow">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-rose-600" />
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">Session Timer</h3>
+                      <p className="text-sm text-gray-600">Optional time limit</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={timerEnabled}
+                      onChange={(e) => setTimerEnabled(e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-14 h-7 bg-gray-300 rounded-full peer peer-checked:bg-rose-500 peer-focus:ring-4 peer-focus:ring-rose-300 transition-all after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:after:translate-x-7"></div>
+                  </label>
+                </div>
+                {timerEnabled && (
+                  <div className="mt-4 animate-fadeIn">
+                    <input
+                      type="number"
+                      min="1"
+                      max="60"
+                      value={timeLimit}
+                      onChange={(e) => setTimeLimit(parseInt(e.target.value) || 5)}
+                      className="w-full px-4 py-3 rounded-lg border-2 border-rose-200 bg-white focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                      placeholder="Minutes"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Generate Button - Full Width CTA */}
+          <div className="mt-12 text-center">
+            <button
+              onClick={handleGenerate}
+              disabled={!selectedFile}
+              className={`group relative inline-flex items-center gap-3 px-12 py-5 rounded-xl font-semibold text-lg transition-all duration-300 ${selectedFile
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl hover:scale-105'
+                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+            >
+              <Sparkles className="w-6 h-6" />
+              <span>Generate {mode === 'quiz' ? 'Quiz' : 'Flashcards'}</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
 
-// B. Quiz View
+// B. Quiz View - Enhanced
 const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -241,6 +364,7 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   const isAnswered = selectedOption !== null;
   const timeLimitSeconds = timeLimit * 60;
   const timeRemaining = timeLimitSeconds - timeElapsed;
+  const progress = ((currentIndex + 1) / data.length) * 100;
 
   const scoreRef = React.useRef(score);
   const historyRef = React.useRef(history);
@@ -308,108 +432,116 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
-      {/* Progress */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-gray-600">
-            Question {currentIndex + 1} of {data.length}
-          </span>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded">{currentQ.tag}</span>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Clock className="w-4 h-4" />
-              <span>{timerEnabled ? formatTime(timeRemaining) : formatTime(timeElapsed)}</span>
-            </div>
-          </div>
-        </div>
-        <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-blue-500 transition-all duration-300"
-            style={{ width: `${((currentIndex + 1) / data.length) * 100}%` }}
-          />
-        </div>
-      </div>
-
-      {isTimeUp && (
-        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-          Time's up! Quiz will be submitted automatically.
-        </div>
-      )}
-
-      {/* Question */}
-      <div className="bg-white border border-gray-200 rounded-lg p-8 mb-6">
-        <h3 className="text-xl font-medium text-gray-900 mb-6 leading-relaxed">
-          {currentQ.question}
-        </h3>
-
-        <div className="space-y-3">
-          {currentQ.options.map((opt, idx) => {
-            let className = "w-full text-left px-4 py-3 rounded-lg border transition-colors ";
-
-            if (isAnswered) {
-              if (idx === currentQ.correctIndex) {
-                className += "border-green-500 bg-green-50 text-green-900";
-              } else if (idx === selectedOption) {
-                className += "border-red-500 bg-red-50 text-red-900";
-              } else {
-                className += "border-gray-200 text-gray-400";
-              }
-            } else {
-              className += "border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50";
-            }
-
-            return (
-              <button
-                key={idx}
-                disabled={isAnswered || isTimeUp}
-                onClick={() => handleOptionClick(idx)}
-                className={className}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">{opt}</span>
-                  {isAnswered && idx === currentQ.correctIndex && <CheckCircle className="w-5 h-5 text-green-600" />}
-                  {isAnswered && idx === selectedOption && idx !== currentQ.correctIndex && <XCircle className="w-5 h-5 text-red-600" />}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        {isAnswered && currentQ.explanation && (
-          <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
-            <div className="flex gap-3">
-              <AlertCircle className="w-5 h-5 text-gray-600 mt-0.5 flex-shrink-0" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <div className="max-w-5xl mx-auto px-8 py-12">
+        {/* Progress Header */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-indigo-100">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <div className="bg-indigo-100 p-3 rounded-lg">
+                <Brain className="w-6 h-6 text-indigo-600" />
+              </div>
               <div>
-                <p className="text-sm font-medium text-gray-900 mb-1">
-                  {selectedOption === currentQ.correctIndex ? 'Correct' : 'Explanation'}
-                </p>
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  {currentQ.explanation}
-                </p>
+                <p className="text-sm text-gray-600">Question {currentIndex + 1} of {data.length}</p>
+                <p className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded inline-block mt-1">{currentQ.tag}</p>
               </div>
             </div>
+            <div className="flex items-center gap-3 bg-indigo-50 px-4 py-2 rounded-lg">
+              <Clock className="w-5 h-5 text-indigo-600" />
+              <span className="font-semibold text-indigo-900">
+                {timerEnabled ? formatTime(timeRemaining) : formatTime(timeElapsed)}
+              </span>
+            </div>
+          </div>
+          <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500 rounded-full"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+
+        {isTimeUp && (
+          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6 flex items-center gap-3 animate-fadeIn">
+            <AlertCircle className="w-6 h-6 text-red-600" />
+            <span className="font-medium text-red-900">Time's up! Quiz will be submitted.</span>
+          </div>
+        )}
+
+        {/* Question Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-10 mb-8 border border-indigo-100">
+          <h3 className="text-2xl font-bold text-gray-900 mb-8 leading-relaxed">
+            {currentQ.question}
+          </h3>
+
+          <div className="space-y-4">
+            {currentQ.options.map((opt, idx) => {
+              let className = "w-full text-left px-6 py-4 rounded-xl border-2 transition-all duration-300 ";
+
+              if (isAnswered) {
+                if (idx === currentQ.correctIndex) {
+                  className += "border-green-500 bg-gradient-to-r from-green-50 to-emerald-50 shadow-lg scale-105";
+                } else if (idx === selectedOption) {
+                  className += "border-red-500 bg-gradient-to-r from-red-50 to-rose-50";
+                } else {
+                  className += "border-gray-200 opacity-50";
+                }
+              } else {
+                className += "border-gray-200 hover:border-indigo-400 hover:bg-indigo-50 hover:shadow-md hover:scale-102";
+              }
+
+              return (
+                <button
+                  key={idx}
+                  disabled={isAnswered || isTimeUp}
+                  onClick={() => handleOptionClick(idx)}
+                  className={className}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-gray-900">{opt}</span>
+                    {isAnswered && idx === currentQ.correctIndex && <CheckCircle className="w-6 h-6 text-green-600" />}
+                    {isAnswered && idx === selectedOption && idx !== currentQ.correctIndex && <XCircle className="w-6 h-6 text-red-600" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {isAnswered && currentQ.explanation && (
+            <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl animate-fadeIn">
+              <div className="flex gap-4">
+                <AlertCircle className="w-6 h-6 text-blue-600 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="font-bold text-blue-900 mb-2">
+                    {selectedOption === currentQ.correctIndex ? '✓ Correct!' : 'Explanation'}
+                  </p>
+                  <p className="text-blue-800 leading-relaxed">
+                    {currentQ.explanation}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Next Button */}
+        {(isAnswered || isTimeUp) && (
+          <div className="flex justify-end animate-fadeIn">
+            <button
+              onClick={handleNext}
+              className="group bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all hover:scale-105"
+            >
+              {currentIndex === data.length - 1 ? "View Results" : "Next Question"}
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </button>
           </div>
         )}
       </div>
-
-      {/* Next Button */}
-      {(isAnswered || isTimeUp) && (
-        <div className="flex justify-end">
-          <button
-            onClick={handleNext}
-            className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
-          >
-            {currentIndex === data.length - 1 ? "View Results" : "Next Question"}
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      )}
     </div>
   );
 };
 
-// C. Flashcard View
+// C. Flashcard View - Enhanced
 const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -419,6 +551,7 @@ const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   const currentCard = data[currentIndex];
   const timeLimitSeconds = timeLimit * 60;
   const timeRemaining = timeLimitSeconds - timeElapsed;
+  const progress = ((currentIndex + 1) / data.length) * 100;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -449,89 +582,96 @@ const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Progress */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm text-gray-600">
-            Card {currentIndex + 1} of {data.length}
-          </span>
-          <div className="flex items-center gap-3">
-            <span className="text-xs text-gray-500 bg-gray-100 px-3 py-1 rounded">{currentCard.tag}</span>
-            <div className="flex items-center gap-2 text-sm text-gray-600">
-              <Clock className="w-4 h-4" />
-              <span>{timerEnabled ? formatTime(timeRemaining) : formatTime(timeElapsed)}</span>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50">
+      <div className="max-w-4xl mx-auto px-8 py-12">
+        {/* Progress Header */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-purple-100">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-4">
+              <div className="bg-purple-100 p-3 rounded-lg">
+                <Lightbulb className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Card {currentIndex + 1} of {data.length}</p>
+                <p className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded inline-block mt-1">{currentCard.tag}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 bg-purple-50 px-4 py-2 rounded-lg">
+              <Clock className="w-5 h-5 text-purple-600" />
+              <span className="font-semibold text-purple-900">
+                {timerEnabled ? formatTime(timeRemaining) : formatTime(timeElapsed)}
+              </span>
             </div>
           </div>
+          <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500 rounded-full"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
-        <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-blue-500 transition-all duration-300"
-            style={{ width: `${((currentIndex + 1) / data.length) * 100}%` }}
-          />
-        </div>
-      </div>
 
-      {/* Card */}
-      <div
-        className="perspective w-full h-80 cursor-pointer mb-8"
-        onClick={() => setIsFlipped(!isFlipped)}
-      >
+        {/* Card */}
         <div
-          className="relative w-full h-full transition-transform duration-500"
-          style={{
-            transformStyle: 'preserve-3d',
-            transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
-          }}
+          className="perspective w-full h-96 cursor-pointer mb-8"
+          onClick={() => setIsFlipped(!isFlipped)}
         >
-          {/* Front */}
           <div
-            className="absolute inset-0 bg-white border border-gray-200 rounded-lg flex items-center justify-center p-8 text-center"
-            style={{ backfaceVisibility: 'hidden' }}
-          >
-            <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400 mb-4">Question</p>
-              <h3 className="text-2xl font-medium text-gray-900">{currentCard.front}</h3>
-              <p className="text-sm text-gray-400 mt-6">Click to reveal answer</p>
-            </div>
-          </div>
-
-          {/* Back */}
-          <div
-            className="absolute inset-0 bg-gray-900 text-white rounded-lg flex items-center justify-center p-8 text-center"
+            className="relative w-full h-full transition-transform duration-700"
             style={{
-              backfaceVisibility: 'hidden',
-              transform: 'rotateY(180deg)'
+              transformStyle: 'preserve-3d',
+              transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
             }}
           >
-            <div>
-              <p className="text-xs uppercase tracking-wide text-gray-400 mb-4">Answer</p>
-              <h3 className="text-xl font-normal leading-relaxed">{currentCard.back}</h3>
+            {/* Front */}
+            <div
+              className="absolute inset-0 bg-white border-2 border-purple-200 rounded-3xl flex items-center justify-center p-12 text-center shadow-2xl"
+              style={{ backfaceVisibility: 'hidden' }}
+            >
+              <div>
+                <p className="text-xs uppercase tracking-wide text-purple-400 mb-6 font-semibold">Question</p>
+                <h3 className="text-3xl font-bold text-gray-900 mb-8">{currentCard.front}</h3>
+                <p className="text-sm text-gray-400">Click to reveal answer</p>
+              </div>
+            </div>
+
+            {/* Back */}
+            <div
+              className="absolute inset-0 bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-3xl flex items-center justify-center p-12 text-center shadow-2xl"
+              style={{
+                backfaceVisibility: 'hidden',
+                transform: 'rotateY(180deg)'
+              }}
+            >
+              <div>
+                <p className="text-xs uppercase tracking-wide text-purple-200 mb-6 font-semibold">Answer</p>
+                <h3 className="text-2xl font-medium leading-relaxed">{currentCard.back}</h3>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Controls */}
-      <div className={`flex gap-3 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <button
-          onClick={(e) => { e.stopPropagation(); handleRating(false); }}
-          className="flex-1 px-6 py-3 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          Didn't Know
-        </button>
-        <button
-          onClick={(e) => { e.stopPropagation(); handleRating(true); }}
-          className="flex-1 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          Knew This
-        </button>
+        {/* Controls */}
+        <div className={`grid grid-cols-2 gap-4 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleRating(false); }}
+            className="px-8 py-4 bg-white border-2 border-red-300 text-red-700 font-semibold rounded-xl hover:bg-red-50 hover:border-red-400 transition-all hover:scale-105 shadow-lg"
+          >
+            Didn't Know
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleRating(true); }}
+            className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all hover:scale-105 shadow-xl"
+          >
+            Knew This
+          </button>
+        </div>
       </div>
     </div>
   );
 };
 
-// D. Summary View
+// D. Summary View - Enhanced
 const SummaryView = ({ results, onReset }) => {
   const isQuiz = results.type === 'quiz';
 
@@ -560,110 +700,123 @@ const SummaryView = ({ results, onReset }) => {
   }, {}) : {};
 
   return (
-    <div className="max-w-3xl mx-auto">
-      {/* Header */}
-      <div className="text-center mb-10">
-        <h2 className="text-3xl font-semibold text-gray-900 mb-2">Session Complete</h2>
-        <p className="text-gray-600">Here's how you performed</p>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
+      <div className="max-w-6xl mx-auto px-8 py-12">
+        {/* Header */}
+        <div className="text-center mb-12 animate-fadeIn">
+          <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-lg mb-6">
+            <CheckCircle className="w-5 h-5 text-green-600" />
+            <span className="font-semibold text-green-900">Session Complete</span>
+          </div>
+          <h2 className="text-5xl font-bold text-gray-900 mb-4">Excellent Work!</h2>
+          <p className="text-xl text-gray-600">Here's your performance summary</p>
+        </div>
 
-      {/* Score Card */}
-      <div className="bg-white border border-gray-200 rounded-lg p-8 mb-8">
-        <div className="text-center">
-          <p className="text-sm text-gray-600 mb-2">Your Score</p>
-          <p className="text-6xl font-semibold text-gray-900 mb-3">{percentage}%</p>
-          <p className="text-gray-600">
-            {isQuiz ? `${results.score} out of ${results.total} correct` : `${results.known} out of ${results.total} known`}
-          </p>
+        {/* Score Card */}
+        <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-12 mb-10 shadow-2xl text-white">
+          <div className="text-center">
+            <p className="text-indigo-100 mb-3 text-lg">Your Score</p>
+            <p className="text-8xl font-bold mb-4">{percentage}%</p>
+            <p className="text-xl text-indigo-100">
+              {isQuiz ? `${results.score} out of ${results.total} correct` : `${results.known} out of ${results.total} known`}
+            </p>
+          </div>
+          <div className="mt-8 h-4 bg-white/20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-white transition-all duration-1000 rounded-full shadow-lg"
+              style={{ width: `${percentage}%` }}
+            />
+          </div>
         </div>
-        <div className="mt-6 h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-blue-500 transition-all duration-1000"
-            style={{ width: `${percentage}%` }}
-          />
-        </div>
-      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <CheckCircle className="w-5 h-5 text-green-500 mb-2" />
-          <p className="text-2xl font-semibold text-gray-900">{isQuiz ? results.score : results.known}</p>
-          <p className="text-xs text-gray-500">Correct</p>
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+          <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-green-200 hover:shadow-xl transition-shadow">
+            <CheckCircle className="w-8 h-8 text-green-500 mb-3" />
+            <p className="text-4xl font-bold text-gray-900">{isQuiz ? results.score : results.known}</p>
+            <p className="text-sm text-gray-600 font-medium">Correct</p>
+          </div>
+          <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-red-200 hover:shadow-xl transition-shadow">
+            <XCircle className="w-8 h-8 text-red-500 mb-3" />
+            <p className="text-4xl font-bold text-gray-900">{results.total - (isQuiz ? results.score : results.known)}</p>
+            <p className="text-sm text-gray-600 font-medium">Incorrect</p>
+          </div>
+          <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-blue-200 hover:shadow-xl transition-shadow">
+            <FileText className="w-8 h-8 text-blue-500 mb-3" />
+            <p className="text-4xl font-bold text-gray-900">{results.total}</p>
+            <p className="text-sm text-gray-600 font-medium">Total</p>
+          </div>
+          {results.timeElapsed && (
+            <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-purple-200 hover:shadow-xl transition-shadow">
+              <Clock className="w-8 h-8 text-purple-500 mb-3" />
+              <p className="text-4xl font-bold text-gray-900">{Math.round(results.timeElapsed / results.total)}s</p>
+              <p className="text-sm text-gray-600 font-medium">Avg/Question</p>
+            </div>
+          )}
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <XCircle className="w-5 h-5 text-red-500 mb-2" />
-          <p className="text-2xl font-semibold text-gray-900">{results.total - (isQuiz ? results.score : results.known)}</p>
-          <p className="text-xs text-gray-500">Incorrect</p>
-        </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <FileText className="w-5 h-5 text-blue-500 mb-2" />
-          <p className="text-2xl font-semibold text-gray-900">{results.total}</p>
-          <p className="text-xs text-gray-500">Total</p>
-        </div>
-        {results.timeElapsed && (
-          <div className="bg-white border border-gray-200 rounded-lg p-4">
-            <Clock className="w-5 h-5 text-gray-500 mb-2" />
-            <p className="text-2xl font-semibold text-gray-900">{Math.round(results.timeElapsed / results.total)}s</p>
-            <p className="text-xs text-gray-500">Avg/Question</p>
+
+        {/* Topic Performance */}
+        {isQuiz && Object.keys(topicStats).length > 0 && (
+          <div className="bg-white rounded-2xl p-8 shadow-lg mb-10 border border-gray-200">
+            <div className="flex items-center gap-3 mb-6">
+              <BarChart2 className="w-6 h-6 text-indigo-600" />
+              <h3 className="text-2xl font-bold text-gray-900">Performance by Topic</h3>
+            </div>
+            <div className="space-y-6">
+              {Object.entries(topicStats).map(([topic, stats]) => {
+                const topicPercentage = Math.round((stats.correct / stats.total) * 100);
+                return (
+                  <div key={topic}>
+                    <div className="flex justify-between items-center mb-3">
+                      <span className="font-semibold text-gray-800">{topic}</span>
+                      <span className="text-sm font-bold text-gray-600 bg-gray-100 px-3 py-1 rounded-lg">
+                        {stats.correct}/{stats.total} ({topicPercentage}%)
+                      </span>
+                    </div>
+                    <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-700 rounded-full ${topicPercentage >= 70 ? 'bg-gradient-to-r from-green-400 to-emerald-500' :
+                            topicPercentage >= 50 ? 'bg-gradient-to-r from-yellow-400 to-orange-500' :
+                              'bg-gradient-to-r from-red-400 to-rose-500'
+                          }`}
+                        style={{ width: `${topicPercentage}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
-      </div>
 
-      {/* Topic Performance */}
-      {isQuiz && Object.keys(topicStats).length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6 mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart2 className="w-5 h-5 text-gray-600" />
-            <h3 className="font-medium text-gray-900">Performance by Topic</h3>
-          </div>
-          <div className="space-y-4">
-            {Object.entries(topicStats).map(([topic, stats]) => {
-              const topicPercentage = Math.round((stats.correct / stats.total) * 100);
-              return (
-                <div key={topic}>
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm text-gray-700">{topic}</span>
-                    <span className="text-sm text-gray-600">{stats.correct}/{stats.total}</span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-blue-500 transition-all duration-700"
-                      style={{ width: `${topicPercentage}%` }}
-                    />
-                  </div>
+        {/* Weak Topics */}
+        {isQuiz && Object.keys(weakTopics).length > 0 && (
+          <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 shadow-lg mb-10 border-2 border-amber-200">
+            <div className="flex items-center gap-3 mb-6">
+              <Lightbulb className="w-6 h-6 text-amber-600" />
+              <h3 className="text-2xl font-bold text-gray-900">Areas to Review</h3>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              {Object.entries(weakTopics).map(([topic, count]) => (
+                <div key={topic} className="bg-white rounded-xl p-4 flex justify-between items-center shadow-sm border border-amber-200">
+                  <span className="font-semibold text-gray-800">{topic}</span>
+                  <span className="text-sm text-amber-700 bg-amber-100 px-3 py-1 rounded-lg font-medium">
+                    Missed {count}
+                  </span>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Weak Topics */}
-      {isQuiz && Object.keys(weakTopics).length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <Lightbulb className="w-5 h-5 text-amber-600" />
-            <h3 className="font-medium text-gray-900">Areas to Review</h3>
-          </div>
-          <div className="space-y-2">
-            {Object.entries(weakTopics).map(([topic, count]) => (
-              <div key={topic} className="flex justify-between items-center text-sm">
-                <span className="text-gray-700">{topic}</span>
-                <span className="text-amber-700">Missed {count}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <button
-        onClick={onReset}
-        className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-      >
-        <RotateCcw className="w-4 h-4" />
-        Start New Session
-      </button>
+        <button
+          onClick={onReset}
+          className="w-full bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white py-5 rounded-xl font-semibold text-lg transition-all hover:scale-105 shadow-xl flex items-center justify-center gap-3"
+        >
+          <RotateCcw className="w-5 h-5" />
+          Start New Session
+        </button>
+      </div>
     </div>
   );
 };
@@ -743,24 +896,32 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Brain className="w-6 h-6 text-blue-500" />
-            <span className="font-semibold text-gray-900">QuizFlash</span>
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 backdrop-blur-sm bg-white/90">
+        <div className="max-w-7xl mx-auto px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Brain className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="font-bold text-xl text-gray-900">QuizFlash</h1>
+              <p className="text-xs text-gray-500">AI Learning Assistant</p>
+            </div>
           </div>
           {stage !== 'upload' && stage !== 'summary' && (
-            <span className="text-sm text-gray-500">
-              {mode === 'quiz' ? 'Quiz Mode' : 'Flashcard Mode'}
-            </span>
+            <div className="flex items-center gap-2 bg-indigo-50 px-4 py-2 rounded-lg">
+              <div className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse"></div>
+              <span className="text-sm font-medium text-indigo-900">
+                {mode === 'quiz' ? 'Quiz Mode' : 'Flashcard Mode'}
+              </span>
+            </div>
           )}
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-5xl mx-auto px-6 py-12">
+      <main>
         {stage === 'upload' && (
           <UploadStage
             onUpload={handleUpload}
@@ -776,31 +937,29 @@ const App = () => {
             setTimerEnabled={setTimerEnabled}
             timeLimit={timeLimit}
             setTimeLimit={setTimeLimit}
-            availableTopics={availableTopics}
-            selectedTopic={selectedTopic}
-            setSelectedTopic={setSelectedTopic}
           />
         )}
 
         {stage === 'processing' && (
-          <div className="flex flex-col items-center justify-center pt-20">
-            <div className="w-12 h-12 border-3 border-gray-200 border-t-blue-500 rounded-full animate-spin mb-6"></div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Processing Your Document</h3>
-            <p className="text-sm text-gray-600">This may take 10-30 seconds</p>
+          <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 flex flex-col items-center justify-center">
+            <div className="w-20 h-20 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-8"></div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Processing Your Document</h3>
+            <p className="text-gray-600">Analyzing content and generating {mode}s with AI...</p>
+            <p className="text-sm text-gray-500 mt-2">This may take 10-30 seconds</p>
           </div>
         )}
 
         {stage === 'error' && (
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white border border-gray-200 rounded-lg p-8 text-center">
-              <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <XCircle className="w-6 h-6 text-red-600" />
+          <div className="min-h-screen bg-gradient-to-br from-red-50 to-rose-50 flex items-center justify-center px-8">
+            <div className="max-w-2xl w-full bg-white rounded-2xl p-12 text-center shadow-2xl border-2 border-red-200">
+              <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <XCircle className="w-10 h-10 text-red-600" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Something Went Wrong</h3>
-              <p className="text-gray-600 mb-6">{error}</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3">Something Went Wrong</h3>
+              <p className="text-gray-600 mb-8">{error}</p>
               <button
                 onClick={handleReset}
-                className="px-6 py-3 bg-gray-900 hover:bg-gray-800 text-white text-sm font-medium rounded-lg transition-colors"
+                className="px-8 py-4 bg-gradient-to-r from-gray-900 to-gray-800 hover:from-gray-800 hover:to-gray-700 text-white font-semibold rounded-xl transition-all hover:scale-105 shadow-xl"
               >
                 Try Again
               </button>
