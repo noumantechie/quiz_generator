@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 /* --- 1. API CONFIGURATION --- */
-const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || `http://${window.location.hostname}:5000`;
+const API_BASE_URL = `http://${window.location.hostname}:5000`;
 
 /* --- 2. API FUNCTIONS --- */
 const uploadDocument = async (file) => {
@@ -63,7 +63,7 @@ const generateQuizOrFlashcard = async (sessionId, mode, numQuestions, difficulty
 
 /* --- 3. SUB-COMPONENTS --- */
 
-// A. Upload Stage - TRUE Full Width Design
+// A. Upload Stage - Improved Design (No Scrolling)
 const UploadStage = ({ onUpload, mode, setMode, numQuestions, setNumQuestions, difficulty, setDifficulty, language, setLanguage, timerEnabled, setTimerEnabled, timeLimit, setTimeLimit }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -95,234 +95,230 @@ const UploadStage = ({ onUpload, mode, setMode, numQuestions, setNumQuestions, d
   ];
 
   return (
-    <div className="w-full">
-      {/* Hero Section - FULL SCREEN WIDTH */}
-      <div className="w-full bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 py-20">
-        <div className="w-full px-12">
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur-md px-6 py-3 rounded-full shadow-lg mb-8">
-              <Sparkles className="w-5 h-5 text-white" />
-              <span className="text-sm font-semibold text-white">AI-Powered Learning Platform</span>
-            </div>
-            <h1 className="text-6xl font-bold text-white mb-6 leading-tight">
-              Transform Your Documents into
-              <span className="block mt-3 text-yellow-300">
-                Interactive Learning
-              </span>
-            </h1>
-            <p className="text-2xl text-white/90 max-w-4xl mx-auto">
-              Upload any document and instantly generate quizzes or flashcards powered by advanced AI
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-6">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Hero Section - Compact */}
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-md mb-3">
+            <Sparkles className="w-4 h-4 text-indigo-600" />
+            <span className="text-sm font-semibold text-indigo-900">AI-Powered Learning Platform</span>
           </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Transform Your Documents into
+            <span className="block mt-1 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Interactive Learning
+            </span>
+          </h1>
+          <p className="text-base text-gray-600">
+            Upload any document and instantly generate quizzes or flashcards
+          </p>
+        </div>
 
-          {/* Upload Area - FULL WIDTH */}
-          <div className="max-w-6xl mx-auto">
-            <div
-              onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-              onDragLeave={() => setIsDragging(false)}
-              onDrop={handleDrop}
-              onClick={() => document.getElementById('file-upload').click()}
-              className={`relative overflow-hidden rounded-3xl transition-all duration-300 cursor-pointer group ${isDragging
-                  ? 'bg-white/30 border-4 border-white scale-[1.02]'
-                  : selectedFile
-                    ? 'bg-gradient-to-br from-green-400 to-emerald-500 border-4 border-green-300'
-                    : 'bg-white/10 backdrop-blur-lg border-4 border-dashed border-white/40 hover:border-white hover:bg-white/20 hover:shadow-2xl'
-                }`}
-            >
-              <div className="px-16 py-24">
-                <div className="flex flex-col items-center gap-8">
-                  <div className={`p-8 rounded-3xl transition-all duration-300 ${isDragging
-                      ? 'bg-white/40 scale-110'
-                      : selectedFile
-                        ? 'bg-white/30'
-                        : 'bg-white/20 group-hover:bg-white/30 group-hover:scale-110'
-                    }`}>
-                    {selectedFile ? (
-                      <CheckCircle className="w-20 h-20 text-white" />
-                    ) : (
-                      <Upload className="w-20 h-20 text-white" />
-                    )}
-                  </div>
-                  <div className="text-center">
-                    {selectedFile ? (
-                      <>
-                        <p className="text-3xl font-bold text-white mb-3">{selectedFile.name}</p>
-                        <p className="text-xl text-white/90">✓ Ready to generate • Click to change file</p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-3xl font-bold text-white mb-3">
-                          {isDragging ? 'Drop your file here' : 'Click to upload or drag and drop'}
-                        </p>
-                        <p className="text-xl text-white/80 mb-2">PDF, DOCX, or TXT files supported</p>
-                        <p className="text-lg text-white/60">Maximum file size: 10MB</p>
-                      </>
-                    )}
-                  </div>
+        {/* Upload Area - Compact */}
+        <div className="mb-6">
+          <div
+            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={handleDrop}
+            onClick={() => document.getElementById('file-upload').click()}
+            className={`relative overflow-hidden rounded-xl transition-all duration-300 cursor-pointer group ${isDragging
+                ? 'bg-indigo-100 border-3 border-indigo-400 scale-105'
+                : selectedFile
+                  ? 'bg-gradient-to-br from-green-50 to-emerald-50 border-3 border-green-400'
+                  : 'bg-white border-3 border-dashed border-gray-300 hover:border-indigo-400 hover:bg-indigo-50 shadow-lg'
+              }`}
+          >
+            <div className="px-6 py-6">
+              <div className="flex flex-col items-center gap-3">
+                <div className={`p-4 rounded-xl transition-all duration-300 ${isDragging
+                    ? 'bg-indigo-200 scale-110'
+                    : selectedFile
+                      ? 'bg-green-100'
+                      : 'bg-gray-100 group-hover:bg-indigo-100 group-hover:scale-110'
+                  }`}>
+                  {selectedFile ? (
+                    <CheckCircle className="w-10 h-10 text-green-600" />
+                  ) : (
+                    <Upload className="w-10 h-10 text-gray-600 group-hover:text-indigo-600" />
+                  )}
+                </div>
+                <div className="text-center">
+                  {selectedFile ? (
+                    <>
+                      <p className="text-lg font-bold text-gray-900 mb-1">{selectedFile.name}</p>
+                      <p className="text-sm text-green-600">✓ Ready to generate • Click to change</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-lg font-bold text-gray-900 mb-1">
+                        {isDragging ? 'Drop your file here' : 'Click to upload or drag and drop'}
+                      </p>
+                      <p className="text-sm text-gray-600">PDF, DOCX, or TXT • Max 10MB</p>
+                    </>
+                  )}
                 </div>
               </div>
-              <input
-                type="file"
-                className="hidden"
-                onChange={(e) => e.target.files[0] && handleFileSelect(e.target.files[0])}
-                id="file-upload"
-                accept=".pdf,.docx,.txt"
-              />
             </div>
+            <input
+              type="file"
+              className="hidden"
+              onChange={(e) => e.target.files[0] && handleFileSelect(e.target.files[0])}
+              id="file-upload"
+              accept=".pdf,.docx,.txt"
+            />
           </div>
         </div>
-      </div>
 
-      {/* Configuration Section - FULL SCREEN WIDTH */}
-      <div className="w-full bg-gradient-to-b from-gray-50 to-white py-16">
-        <div className="w-full px-12">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">Configure Your Learning Session</h2>
+        {/* Configuration Section - Full Width with Flexbox */}
+        <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
+          <h2 className="text-xl font-bold text-gray-900 mb-5 text-center">Configure Your Learning Session</h2>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            {/* Learning Mode - FULL WIDTH CARD */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-indigo-100 hover:shadow-2xl transition-all hover:scale-105">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-indigo-100 rounded-xl">
-                  <Brain className="w-6 h-6 text-indigo-600" />
+          {/* First Row - Learning Mode & Difficulty (Blue/Orange theme) */}
+          <div className="flex flex-col lg:flex-row gap-4 mb-5">
+            {/* Learning Mode */}
+            <div className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-5 hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <Brain className="w-4 h-4 text-blue-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">Learning Mode</h3>
+                <h3 className="text-base font-bold text-gray-900">Learning Mode</h3>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <button
                   onClick={() => setMode('quiz')}
-                  className={`w-full p-6 rounded-xl border-3 transition-all duration-300 text-left ${mode === 'quiz'
-                      ? 'border-indigo-500 bg-gradient-to-br from-indigo-50 to-blue-50 shadow-lg scale-105'
-                      : 'border-gray-200 bg-white hover:border-indigo-300 hover:shadow-md'
+                  className={`w-full p-3 rounded-lg border-2 transition-all duration-300 text-left ${mode === 'quiz'
+                      ? 'border-indigo-500 bg-indigo-50 shadow-md'
+                      : 'border-gray-200 bg-white hover:border-indigo-300'
                     }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <Target className={`w-10 h-10 ${mode === 'quiz' ? 'text-indigo-600' : 'text-gray-400'}`} />
+                  <div className="flex items-center gap-3">
+                    <Target className={`w-7 h-7 ${mode === 'quiz' ? 'text-indigo-600' : 'text-gray-400'}`} />
                     <div>
-                      <p className={`text-xl font-bold ${mode === 'quiz' ? 'text-indigo-900' : 'text-gray-700'}`}>
+                      <p className={`text-sm font-bold ${mode === 'quiz' ? 'text-indigo-900' : 'text-gray-700'}`}>
                         Quiz
                       </p>
-                      <p className="text-sm text-gray-600">Test your knowledge with questions</p>
+                      <p className="text-xs text-gray-600">Test your knowledge</p>
                     </div>
                   </div>
                 </button>
                 <button
                   onClick={() => setMode('flashcard')}
-                  className={`w-full p-6 rounded-xl border-3 transition-all duration-300 text-left ${mode === 'flashcard'
-                      ? 'border-purple-500 bg-gradient-to-br from-purple-50 to-pink-50 shadow-lg scale-105'
-                      : 'border-gray-200 bg-white hover:border-purple-300 hover:shadow-md'
+                  className={`w-full p-3 rounded-lg border-2 transition-all duration-300 text-left ${mode === 'flashcard'
+                      ? 'border-purple-500 bg-purple-50 shadow-md'
+                      : 'border-gray-200 bg-white hover:border-purple-300'
                     }`}
                 >
-                  <div className="flex items-center gap-4">
-                    <Lightbulb className={`w-10 h-10 ${mode === 'flashcard' ? 'text-purple-600' : 'text-gray-400'}`} />
+                  <div className="flex items-center gap-3">
+                    <Lightbulb className={`w-7 h-7 ${mode === 'flashcard' ? 'text-purple-600' : 'text-gray-400'}`} />
                     <div>
-                      <p className={`text-xl font-bold ${mode === 'flashcard' ? 'text-purple-900' : 'text-gray-700'}`}>
+                      <p className={`text-sm font-bold ${mode === 'flashcard' ? 'text-purple-900' : 'text-gray-700'}`}>
                         Flashcards
                       </p>
-                      <p className="text-sm text-gray-600">Learn with interactive cards</p>
+                      <p className="text-xs text-gray-600">Interactive learning</p>
                     </div>
                   </div>
                 </button>
               </div>
             </div>
 
-            {/* Difficulty Level - FULL WIDTH CARD */}
-            <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-orange-100 hover:shadow-2xl transition-all hover:scale-105">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-3 bg-orange-100 rounded-xl">
-                  <Zap className="w-6 h-6 text-orange-600" />
+            {/* Difficulty Level */}
+            <div className="flex-1 bg-gradient-to-br from-orange-50 to-amber-50 border-2 border-orange-200 rounded-lg p-5 hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-orange-100 rounded-lg">
+                  <Zap className="w-4 h-4 text-orange-600" />
                 </div>
-                <h3 className="text-2xl font-bold text-gray-900">Difficulty Level</h3>
+                <h3 className="text-base font-bold text-gray-900">Difficulty Level</h3>
               </div>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {[
-                  { value: 'basic', label: 'Basic', desc: 'Simple recall questions', color: 'green' },
+                  { value: 'basic', label: 'Basic', desc: 'Simple questions', color: 'green' },
                   { value: 'medium', label: 'Medium', desc: 'Moderate complexity', color: 'blue' },
                   { value: 'advanced', label: 'Advanced', desc: 'Critical thinking', color: 'red' }
                 ].map(({ value, label, desc, color }) => (
                   <button
                     key={value}
                     onClick={() => setDifficulty(value)}
-                    className={`w-full px-6 py-4 rounded-xl font-bold text-lg transition-all duration-300 ${difficulty === value
-                        ? `bg-${color}-500 text-white shadow-lg scale-105`
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:shadow-md'
+                    className={`w-full px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-300 ${difficulty === value
+                        ? `bg-${color}-500 text-white shadow-md`
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="text-left">
                         <div>{label}</div>
-                        <div className={`text-sm font-normal ${difficulty === value ? 'text-white/80' : 'text-gray-500'}`}>
+                        <div className={`text-xs font-normal ${difficulty === value ? 'text-white opacity-90' : 'text-gray-500'}`}>
                           {desc}
                         </div>
                       </div>
-                      {difficulty === value && <CheckCircle className="w-6 h-6" />}
+                      {difficulty === value && <CheckCircle className="w-4 h-4" />}
                     </div>
                   </button>
                 ))}
               </div>
             </div>
+          </div>
 
-            {/* Language & Settings - FULL WIDTH CARD */}
-            <div className="space-y-8">
-              {/* Language */}
-              <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-blue-100 hover:shadow-2xl transition-all hover:scale-105">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="p-3 bg-blue-100 rounded-xl">
-                    <Globe className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Language</h3>
+          {/* Second Row - Language & Questions (Teal/Purple theme) */}
+          <div className="flex flex-col lg:flex-row gap-4 mb-5">
+            {/* Language */}
+            <div className="flex-1 bg-gradient-to-br from-teal-50 to-cyan-50 border-2 border-teal-200 rounded-lg p-5 hover:shadow-md transition-all">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="p-2 bg-teal-100 rounded-lg">
+                  <Globe className="w-4 h-4 text-teal-600" />
                 </div>
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full px-6 py-4 rounded-xl border-2 border-gray-200 bg-white text-lg font-medium text-gray-900 focus:outline-none focus:ring-4 focus:ring-blue-500 focus:border-transparent transition-all cursor-pointer hover:border-blue-300"
-                >
-                  {languages.map(lang => (
-                    <option key={lang.code} value={lang.code} className="text-lg">
-                      {lang.flag} {lang.name}
-                    </option>
-                  ))}
-                </select>
+                <h3 className="text-base font-bold text-gray-900">Language</h3>
               </div>
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border-2 border-gray-200 bg-white text-sm font-medium text-gray-900 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all cursor-pointer hover:border-teal-300"
+              >
+                {languages.map(lang => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.flag} {lang.name}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-              {/* Questions */}
-              <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-purple-100 hover:shadow-2xl transition-all hover:scale-105">
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-3">
-                    <div className="p-3 bg-purple-100 rounded-xl">
-                      <BarChart2 className="w-6 h-6 text-purple-600" />
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900">Questions</h3>
+            {/* Questions */}
+            <div className="flex-1 bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg p-5 hover:shadow-md transition-all">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <BarChart2 className="w-4 h-4 text-purple-600" />
                   </div>
-                  <div className="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold text-2xl min-w-[80px] text-center">
-                    {numQuestions}
-                  </div>
+                  <h3 className="text-base font-bold text-gray-900">Questions</h3>
                 </div>
-                <input
-                  type="range"
-                  min="3"
-                  max="20"
-                  value={numQuestions}
-                  onChange={(e) => setNumQuestions(parseInt(e.target.value))}
-                  className="w-full h-4 bg-purple-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
-                />
-                <div className="flex justify-between text-sm text-gray-600 mt-3 font-medium">
-                  <span>3 min</span>
-                  <span>20 max</span>
+                <div className="bg-purple-600 text-white px-3 py-1 rounded-lg font-bold text-lg">
+                  {numQuestions}
                 </div>
+              </div>
+              <input
+                type="range"
+                min="3"
+                max="20"
+                value={numQuestions}
+                onChange={(e) => setNumQuestions(parseInt(e.target.value))}
+                className="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer accent-purple-600"
+              />
+              <div className="flex justify-between text-xs text-gray-600 mt-2 font-medium">
+                <span>3 min</span>
+                <span>20 max</span>
               </div>
             </div>
           </div>
 
-          {/* Timer - FULL WIDTH */}
-          <div className="bg-white rounded-2xl p-8 shadow-xl border-2 border-rose-100 hover:shadow-2xl transition-all mb-12">
+          {/* Timer - Full Width (Pink theme) */}
+          <div className="bg-gradient-to-br from-rose-50 to-pink-50 border-2 border-rose-200 rounded-lg p-5 hover:shadow-md transition-all">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-4 bg-rose-100 rounded-xl">
-                  <Clock className="w-7 h-7 text-rose-600" />
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-rose-100 rounded-lg">
+                  <Clock className="w-4 h-4 text-rose-600" />
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900">Session Timer</h3>
-                  <p className="text-gray-600">Set an optional time limit for your session</p>
+                  <h3 className="text-base font-bold text-gray-900">Session Timer</h3>
+                  <p className="text-xs text-gray-600">Optional time limit</p>
                 </div>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -332,46 +328,46 @@ const UploadStage = ({ onUpload, mode, setMode, numQuestions, setNumQuestions, d
                   onChange={(e) => setTimerEnabled(e.target.checked)}
                   className="sr-only peer"
                 />
-                <div className="w-20 h-10 bg-gray-300 rounded-full peer peer-checked:bg-rose-500 peer-focus:ring-4 peer-focus:ring-rose-300 transition-all after:content-[''] after:absolute after:top-1 after:left-1 after:bg-white after:rounded-full after:h-8 after:w-8 after:transition-all peer-checked:after:translate-x-10"></div>
+                <div className="w-12 h-6 bg-gray-300 rounded-full peer peer-checked:bg-rose-500 peer-focus:ring-4 peer-focus:ring-rose-300 transition-all after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-6"></div>
               </label>
             </div>
             {timerEnabled && (
-              <div className="mt-6 animate-fadeIn">
+              <div className="mt-3">
                 <input
                   type="number"
                   min="1"
                   max="60"
                   value={timeLimit}
                   onChange={(e) => setTimeLimit(parseInt(e.target.value) || 5)}
-                  className="w-full px-6 py-4 rounded-xl border-2 border-rose-200 bg-rose-50 text-lg font-bold text-gray-900 focus:outline-none focus:ring-4 focus:ring-rose-500 focus:border-transparent transition-all"
-                  placeholder="Enter minutes (1-60)"
+                  className="w-full px-4 py-2 rounded-lg border-2 border-rose-200 bg-white text-sm font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:border-transparent transition-all"
+                  placeholder="Minutes (1-60)"
                 />
               </div>
             )}
           </div>
+        </div>
 
-          {/* Generate Button - FULL WIDTH */}
-          <div className="text-center">
-            <button
-              onClick={handleGenerate}
-              disabled={!selectedFile}
-              className={`group relative inline-flex items-center gap-4 px-16 py-6 rounded-2xl font-bold text-2xl transition-all duration-300 ${selectedFile
-                  ? 'bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-700 hover:via-purple-700 hover:to-pink-700 text-white shadow-2xl hover:shadow-3xl hover:scale-110'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-            >
-              <Sparkles className="w-8 h-8" />
-              <span>Generate {mode === 'quiz' ? 'Quiz' : 'Flashcards'} Now</span>
-              <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
-            </button>
-          </div>
+        {/* Generate Button */}
+        <div className="text-center">
+          <button
+            onClick={handleGenerate}
+            disabled={!selectedFile}
+            className={`group inline-flex items-center gap-3 px-8 py-3 rounded-xl font-bold text-base transition-all duration-300 ${selectedFile
+                ? 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-xl hover:shadow-2xl hover:scale-105'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              }`}
+          >
+            <Sparkles className="w-5 h-5" />
+            <span>Generate {mode === 'quiz' ? 'Quiz' : 'Flashcards'}</span>
+            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-// B. Quiz View - Enhanced (keeping existing implementation)
+// B. Quiz View
 const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
@@ -454,7 +450,6 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <div className="max-w-5xl mx-auto px-8 py-12">
-        {/* Progress Header */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-indigo-100">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
@@ -482,13 +477,12 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
         </div>
 
         {isTimeUp && (
-          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6 flex items-center gap-3 animate-fadeIn">
+          <div className="bg-red-50 border-2 border-red-200 rounded-xl p-4 mb-6 flex items-center gap-3">
             <AlertCircle className="w-6 h-6 text-red-600" />
             <span className="font-medium text-red-900">Time's up! Quiz will be submitted.</span>
           </div>
         )}
 
-        {/* Question Card */}
         <div className="bg-white rounded-2xl shadow-xl p-10 mb-8 border border-indigo-100">
           <h3 className="text-2xl font-bold text-gray-900 mb-8 leading-relaxed">
             {currentQ.question}
@@ -528,7 +522,7 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
           </div>
 
           {isAnswered && currentQ.explanation && (
-            <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl animate-fadeIn">
+            <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl">
               <div className="flex gap-4">
                 <AlertCircle className="w-6 h-6 text-blue-600 mt-0.5 flex-shrink-0" />
                 <div>
@@ -544,9 +538,8 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
           )}
         </div>
 
-        {/* Next Button */}
         {(isAnswered || isTimeUp) && (
-          <div className="flex justify-end animate-fadeIn">
+          <div className="flex justify-end">
             <button
               onClick={handleNext}
               className="group bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-8 py-4 rounded-xl font-semibold flex items-center gap-3 shadow-xl hover:shadow-2xl transition-all hover:scale-105"
@@ -561,7 +554,7 @@ const QuizView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   );
 };
 
-// C. Flashcard View - Enhanced (keeping existing implementation)
+// C. Flashcard View
 const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -604,7 +597,6 @@ const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50">
       <div className="max-w-4xl mx-auto px-8 py-12">
-        {/* Progress Header */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-purple-100">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-4">
@@ -631,7 +623,6 @@ const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
           </div>
         </div>
 
-        {/* Card */}
         <div
           className="perspective w-full h-96 cursor-pointer mb-8"
           onClick={() => setIsFlipped(!isFlipped)}
@@ -643,7 +634,6 @@ const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
               transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'
             }}
           >
-            {/* Front */}
             <div
               className="absolute inset-0 bg-white border-2 border-purple-200 rounded-3xl flex items-center justify-center p-12 text-center shadow-2xl"
               style={{ backfaceVisibility: 'hidden' }}
@@ -655,7 +645,6 @@ const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
               </div>
             </div>
 
-            {/* Back */}
             <div
               className="absolute inset-0 bg-gradient-to-br from-purple-600 to-pink-600 text-white rounded-3xl flex items-center justify-center p-12 text-center shadow-2xl"
               style={{
@@ -671,7 +660,6 @@ const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
           </div>
         </div>
 
-        {/* Controls */}
         <div className={`grid grid-cols-2 gap-4 transition-opacity duration-300 ${isFlipped ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
           <button
             onClick={(e) => { e.stopPropagation(); handleRating(false); }}
@@ -691,7 +679,7 @@ const FlashcardView = ({ data, onComplete, timerEnabled, timeLimit }) => {
   );
 };
 
-// D. Summary View - Enhanced (keeping existing implementation)
+// D. Summary View
 const SummaryView = ({ results, onReset }) => {
   const isQuiz = results.type === 'quiz';
 
@@ -722,8 +710,7 @@ const SummaryView = ({ results, onReset }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50">
       <div className="max-w-6xl mx-auto px-8 py-12">
-        {/* Header */}
-        <div className="text-center mb-12 animate-fadeIn">
+        <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-white px-4 py-2 rounded-full shadow-lg mb-6">
             <CheckCircle className="w-5 h-5 text-green-600" />
             <span className="font-semibold text-green-900">Session Complete</span>
@@ -732,7 +719,6 @@ const SummaryView = ({ results, onReset }) => {
           <p className="text-xl text-gray-600">Here's your performance summary</p>
         </div>
 
-        {/* Score Card */}
         <div className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-12 mb-10 shadow-2xl text-white">
           <div className="text-center">
             <p className="text-indigo-100 mb-3 text-lg">Your Score</p>
@@ -749,7 +735,6 @@ const SummaryView = ({ results, onReset }) => {
           </div>
         </div>
 
-        {/* Stats Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
           <div className="bg-white rounded-2xl p-6 shadow-lg border-2 border-green-200 hover:shadow-xl transition-shadow">
             <CheckCircle className="w-8 h-8 text-green-500 mb-3" />
@@ -775,7 +760,6 @@ const SummaryView = ({ results, onReset }) => {
           )}
         </div>
 
-        {/* Topic Performance */}
         {isQuiz && Object.keys(topicStats).length > 0 && (
           <div className="bg-white rounded-2xl p-8 shadow-lg mb-10 border border-gray-200">
             <div className="flex items-center gap-3 mb-6">
@@ -809,7 +793,6 @@ const SummaryView = ({ results, onReset }) => {
           </div>
         )}
 
-        {/* Weak Topics */}
         {isQuiz && Object.keys(weakTopics).length > 0 && (
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl p-8 shadow-lg mb-10 border-2 border-amber-200">
             <div className="flex items-center gap-3 mb-6">
@@ -917,7 +900,6 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
       <header className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 shadow-lg sticky top-0 z-50">
         <div className="w-full px-12 h-24 flex items-center justify-between">
           <div className="flex items-center gap-4">
@@ -940,7 +922,6 @@ const App = () => {
         </div>
       </header>
 
-      {/* Main Content */}
       <main>
         {stage === 'upload' && (
           <UploadStage
